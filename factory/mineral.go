@@ -20,7 +20,7 @@ type MineralState string
 
 type Mineral struct {
 	Name         string       `json:"name"`
-	MeltingPoint float64      `json:"melting_point"`
+	MeltingPoint int          `json:"melting_point"`
 	Hardness     int          `json:"hardness"`
 	Fractures    int          `json:"fractures"`
 	State        MineralState `json:"state"`

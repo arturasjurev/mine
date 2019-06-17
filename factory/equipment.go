@@ -10,14 +10,15 @@ type Equipment interface {
 	// only one item. Should return true if any mineral is inserted.
 	Empty() bool
 
-	// SetPower sets equipment power in watts. One watt is used to
+	// SetPower sets equipment power in watts. 1 watt is used to
 	// crack 1 hardness per second or to control 1 temperature per
 	// second. Power change while performing action should not
 	// affect current action speed.
 	SetPower(watts int) error
 
 	// Insert mineral into equipment. Mineral should be inserted into
-	// equipment before applying action to this mineral.
+	// equipment before applying action to this mineral. Equipment
+	// must be empty before inserting something.
 	Insert(item Mineral) error
 
 	// Takeout should return mineral from equipment. After successful

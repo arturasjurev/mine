@@ -3,7 +3,6 @@ package grinder
 import (
 	"context"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/sheirys/mine/factory"
@@ -11,21 +10,17 @@ import (
 
 // MemGrinder satisfies Equipment interface defined in factory/equipment.go
 type MemGrinder struct {
-	mtx      *sync.Mutex
-	empty    bool
-	power    int
-	inserted factory.Mineral
+	Power    int
+	inserted bool
+	resource factory.Mineral
 }
 
 func NewMemGrinder() *MemGrinder {
-	return &MemGrinder{
-		mtx:   &sync.Mutex{},
-		empty: true,
-	}
+	return &MemGrinder{}
 }
 
 func (g *MemGrinder) Empty() bool {
-	return g.empty
+	return !g.inserted
 }
 
 func (g *MemGrinder) SetPower(watts int) error {
@@ -35,50 +30,54 @@ func (g *MemGrinder) SetPower(watts int) error {
 	if watts < 0 {
 		return fmt.Errorf("nagetive power")
 	}
-	g.power = watts
+	g.Power = watts
 	return nil
 }
 
 func (g *MemGrinder) Insert(item factory.Mineral) error {
-	if !g.empty {
+	if g.inserted {
 		return fmt.Errorf("grinder is not empty")
 	}
-	g.inserted = item
-	g.empty = false
+	g.resource = item
+	g.inserted = true
 	return nil
 }
 
 func (g *MemGrinder) Takeout() (factory.Mineral, error) {
-	g.empty = true
-	return g.inserted, nil
+	g.inserted = false
+	return g.resource, nil
 }
 
 func (g *MemGrinder) Process() error {
-	if g.empty {
+	if !g.inserted {
 		return fmt.Errorf("grinder is empty")
 	}
-	processTime := factory.CalculateProcessTime(g.inserted.Hardness, g.power)
+	processTime := factory.CalculateProcessTime(g.resource.Hardness, g.Power)
 
 	if processTime != 0 {
 		done := time.Tick(processTime)
 		<-done
 	}
 
-	g.inserted.State = factory.Fracture
-	g.inserted.Fractures *= 2
+	g.resource.State = factory.Fracture
+	if g.resource.Fractures > 0 {
+		g.resource.Fractures *= 2
+	} else {
+		g.resource.Fractures = 1
+	}
 	return nil
 }
 
 func (g *MemGrinder) ProcessWithCtx(ctx context.Context) error {
-	if g.empty {
+	if !g.inserted {
 		return fmt.Errorf("grinder is empty")
 	}
-	processTime := factory.CalculateProcessTime(g.inserted.Hardness, g.power)
+	processTime := factory.CalculateProcessTime(g.resource.Hardness, g.Power)
 	done := time.Tick(processTime)
 
 	select {
 	case <-done:
-		g.inserted.State = factory.Fracture
+		g.resource.State = factory.Fracture
 		return nil
 	case <-ctx.Done():
 		return nil

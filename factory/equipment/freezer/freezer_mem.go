@@ -1,4 +1,4 @@
-package smelter
+package freezer
 
 import (
 	"context"
@@ -8,21 +8,21 @@ import (
 	"github.com/sheirys/mine/factory"
 )
 
-type MemSmelter struct {
+type MemFreezer struct {
 	Power    int
 	inserted bool
 	resource factory.Mineral
 }
 
-func NewMemSmelter() *MemSmelter {
-	return &MemSmelter{}
+func NewMemFreezer() *MemFreezer {
+	return &MemFreezer{}
 }
 
-func (g *MemSmelter) Empty() bool {
+func (g *MemFreezer) Empty() bool {
 	return !g.inserted
 }
 
-func (g *MemSmelter) SetPower(watts int) error {
+func (g *MemFreezer) SetPower(watts int) error {
 	if watts < 0 {
 		return fmt.Errorf("nagetive power")
 	}
@@ -30,7 +30,7 @@ func (g *MemSmelter) SetPower(watts int) error {
 	return nil
 }
 
-func (g *MemSmelter) Insert(item factory.Mineral) error {
+func (g *MemFreezer) Insert(item factory.Mineral) error {
 	if !g.inserted {
 		return fmt.Errorf("smelter is not empty")
 	}
@@ -39,11 +39,11 @@ func (g *MemSmelter) Insert(item factory.Mineral) error {
 	return nil
 }
 
-func (g *MemSmelter) Takeout() (factory.Mineral, error) {
+func (g *MemFreezer) Takeout() (factory.Mineral, error) {
 	return g.resource, nil
 }
 
-func (g *MemSmelter) Perform() error {
+func (g *MemFreezer) Perform() error {
 	if !g.inserted {
 		return fmt.Errorf("smelter is empty")
 	}
@@ -54,18 +54,18 @@ func (g *MemSmelter) Perform() error {
 		<-done
 	}
 
-	g.resource.State = factory.Liquid
+	g.resource.State = factory.Solid
 	g.resource.Fractures = 0
 	return nil
 }
 
-func (g *MemSmelter) PerformWithCtx(ctx context.Context) error {
+func (g *MemFreezer) PerformWithCtx(ctx context.Context) error {
 	processTime := factory.CalculateProcessTime(g.resource.Hardness, g.Power)
 	done := time.Tick(processTime)
 
 	select {
 	case <-done:
-		g.resource.State = factory.Liquid
+		g.resource.State = factory.Solid
 		return nil
 	case <-ctx.Done():
 		return nil

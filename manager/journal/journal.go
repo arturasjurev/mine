@@ -17,7 +17,6 @@ type Order struct {
 	ClientID     string               `json:"client_id"`
 	Finished     bool                 `json:"finished"`
 	Accepted     bool                 `json:"accepted"`
-	MineralCount int                  `json:"count"`
 	Mineral      factory.Mineral      `json:"mineral"`
 	StateFrom    factory.MineralState `json:"state_from"`
 	StateTo      factory.MineralState `json:"state_to"`

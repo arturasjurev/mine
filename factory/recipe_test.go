@@ -31,6 +31,14 @@ func TestGenerateRecipe(t *testing.T) {
 			},
 			ExpectedErr: false,
 		},
+		{
+			From: factory.Mineral{State: factory.Fracture},
+			To:   factory.Mineral{State: factory.Fracture},
+			ExpectedRecipe: []factory.RecipeAction{
+				factory.ApplyGrinding,
+			},
+			ExpectedErr: false,
+		},
 	}
 
 	for i, v := range testTable {

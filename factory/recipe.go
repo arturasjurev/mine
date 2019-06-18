@@ -60,7 +60,17 @@ func GenerateRecipe(current, asked Mineral) ([]RecipeAction, error) {
 // SPOILER ALERT: RECURSION USED
 func chainActions(recipe []RecipeAction, now, stop MineralState) ([]RecipeAction, error) {
 
-	// if current state is same as asked state, then we are finished.
+	// NOTICE: there is special case. Only on fractured state it is
+	// possible to apply grinding again, because sometimes what we
+	// want to achieve is to double its fractures. Because of this
+	// we can process order like `order{from: fractured, to: fractured}`
+	// in case we want to double its fractures.
+	if now == stop && stop == Fracture && len(recipe) == 0 {
+		recipe = append(recipe, ApplyGrinding)
+		return recipe, nil
+	}
+
+	// if current mineral state is same as asked state, then we are finished.
 	if now == stop {
 		return recipe, nil
 	}

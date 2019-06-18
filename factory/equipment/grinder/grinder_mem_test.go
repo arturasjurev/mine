@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/sheirys/mine/factory"
-	"github.com/sheirys/mine/factory/grinder"
+	"github.com/sheirys/mine/factory/equipment/grinder"
 	"github.com/stretchr/testify/assert"
 )
 

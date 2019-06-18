@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/sheirys/mine/factory"
-	"github.com/sheirys/mine/factory/grinder"
+	"github.com/sheirys/mine/factory/equipment/grinder"
 )
 
 func main() {

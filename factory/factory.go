@@ -16,7 +16,7 @@ func (f *Factory) Grind() error {
 	if err := f.Grinder.Insert(f.Resource); err != nil {
 		return err
 	}
-	if err := f.Grinder.Perform(); err != nil {
+	if err := f.Grinder.Process(); err != nil {
 		return err
 	}
 	if product, err := f.Grinder.Takeout(); err != nil {
@@ -31,7 +31,7 @@ func (f *Factory) Freeze() error {
 	if err := f.Freezer.Insert(f.Resource); err != nil {
 		return err
 	}
-	if err := f.Freezer.Perform(); err != nil {
+	if err := f.Freezer.Process(); err != nil {
 		return err
 	}
 	if product, err := f.Freezer.Takeout(); err != nil {
@@ -46,7 +46,7 @@ func (f *Factory) Smelt() error {
 	if err := f.Smelter.Insert(f.Resource); err != nil {
 		return err
 	}
-	if err := f.Smelter.Perform(); err != nil {
+	if err := f.Smelter.Process(); err != nil {
 		return err
 	}
 	if product, err := f.Smelter.Takeout(); err != nil {

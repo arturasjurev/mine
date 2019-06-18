@@ -6,7 +6,8 @@ import (
 )
 
 func main() {
-	app := &manager.Application{
-		Journal: journal.JournalFileService{},
+	_ = &manager.Application{
+		Journal: &journal.JournalFileService{},
 	}
+
 }

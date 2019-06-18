@@ -15,30 +15,33 @@ type Equipment interface {
 
 	// SetPower sets equipment power in watts. 1 watt is used to
 	// crack 1 hardness per second or to control 1 temperature per
-	// second. Power change while performing action should not
-	// affect current action speed.
+	// second. Power change while processing should not affect
+	// current action speed.
 	SetPower(watts int) error
 
 	// Insert mineral into equipment. Mineral should be inserted into
-	// equipment before applying action to this mineral. Equipment
+	// equipment before applying process to this mineral. Equipment
 	// must be empty before inserting something.
 	Insert(item Mineral) error
 
 	// Takeout should return mineral from equipment. After successful
 	// takeout, equipment should become empty. Takeout should fail if
-	// action is in progress.
+	// process is in progress.
 	Takeout() (Mineral, error)
 
-	// Perform action on inserted mineral. Action should change
-	// inserted mineral state. After successful perform, mineral can be
+	// Process action on inserted mineral. Action should change
+	// inserted mineral state. After successful process, mineral can be
 	// taked out.
-	Perform() error
+	Process() error
 
-	// PerformWithCtx is same as Perform, but context should be accepted
+	// ProcessWithCtx is same as Process, but context should be accepted
 	// in order to stop action in middle.
-	PerformWithCtx(ctx context.Context) error
+	ProcessWithCtx(ctx context.Context) error
 }
 
+// CalculateProcessTime will calculate how long equipment should process inserted
+// mineral to change its state. Here, depending on equipment, mineral hardness or
+// mineral melting point should be passed as challenge and equipment power as power.
 func CalculateProcessTime(challange, power int) time.Duration {
 	// we cannot apply any calculations if power is zero, because there
 	// will be divizion by zero.

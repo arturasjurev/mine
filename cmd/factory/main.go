@@ -29,7 +29,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := g.Perform(); err != nil {
+	if err := g.Process(); err != nil {
 		log.Fatal(err)
 	}
 

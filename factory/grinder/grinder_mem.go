@@ -3,7 +3,6 @@ package grinder
 import (
 	"context"
 	"fmt"
-	"log"
 	"sync"
 	"time"
 
@@ -54,7 +53,7 @@ func (g *MemGrinder) Takeout() (factory.Mineral, error) {
 	return g.inserted, nil
 }
 
-func (g *MemGrinder) Perform() error {
+func (g *MemGrinder) Process() error {
 	if g.empty {
 		return fmt.Errorf("grinder is empty")
 	}
@@ -65,22 +64,21 @@ func (g *MemGrinder) Perform() error {
 		<-done
 	}
 
-	g.inserted.State = factory.Dust
+	g.inserted.State = factory.Fracture
+	g.inserted.Fractures *= 2
 	return nil
 }
 
-func (g *MemGrinder) PerformWithCtx(ctx context.Context) error {
+func (g *MemGrinder) ProcessWithCtx(ctx context.Context) error {
 	if g.empty {
 		return fmt.Errorf("grinder is empty")
 	}
 	processTime := factory.CalculateProcessTime(g.inserted.Hardness, g.power)
-
-	log.Printf("calculated time %s\n", processTime)
 	done := time.Tick(processTime)
 
 	select {
 	case <-done:
-		g.inserted.State = factory.Dust
+		g.inserted.State = factory.Fracture
 		return nil
 	case <-ctx.Done():
 		return nil

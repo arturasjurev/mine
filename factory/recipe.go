@@ -21,9 +21,8 @@ const (
 // should be performed on mineral in what order.
 var stateTable = map[MineralState]int{
 	Fracture: 0,
-	Dust:     1,
-	Liquid:   2,
-	Solid:    3,
+	Liquid:   1,
+	Solid:    2,
 }
 
 func getByOrder(order int) (MineralState, error) {
@@ -70,6 +69,11 @@ func chainActions(recipe []RecipeAction, now, stop MineralState) ([]RecipeAction
 	current, _ := stateTable[now]
 	current++
 
+	// apply state rotation
+	if current >= len(stateTable) {
+		current = 0
+	}
+
 	// convert next state order into real string state.
 	nextState, err := getByOrder(current)
 	if err != nil {
@@ -77,7 +81,7 @@ func chainActions(recipe []RecipeAction, now, stop MineralState) ([]RecipeAction
 	}
 
 	switch nextState {
-	case Dust:
+	case Fracture:
 		recipe = append(recipe, ApplyGrinding)
 	case Liquid:
 		recipe = append(recipe, ApplySmelting)

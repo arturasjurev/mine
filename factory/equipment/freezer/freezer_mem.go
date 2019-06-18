@@ -31,8 +31,8 @@ func (g *MemFreezer) SetPower(watts int) error {
 }
 
 func (g *MemFreezer) Insert(item factory.Mineral) error {
-	if !g.inserted {
-		return fmt.Errorf("smelter is not empty")
+	if g.inserted {
+		return fmt.Errorf("freezer is not empty")
 	}
 	g.resource = item
 	g.inserted = true
@@ -40,12 +40,13 @@ func (g *MemFreezer) Insert(item factory.Mineral) error {
 }
 
 func (g *MemFreezer) Takeout() (factory.Mineral, error) {
+	g.inserted = false
 	return g.resource, nil
 }
 
-func (g *MemFreezer) Perform() error {
+func (g *MemFreezer) Process() error {
 	if !g.inserted {
-		return fmt.Errorf("smelter is empty")
+		return fmt.Errorf("freezer is empty")
 	}
 	processTime := factory.CalculateProcessTime(g.resource.Hardness, g.Power)
 
@@ -59,7 +60,7 @@ func (g *MemFreezer) Perform() error {
 	return nil
 }
 
-func (g *MemFreezer) PerformWithCtx(ctx context.Context) error {
+func (g *MemFreezer) ProcessWithCtx(ctx context.Context) error {
 	processTime := factory.CalculateProcessTime(g.resource.Hardness, g.Power)
 	done := time.Tick(processTime)
 

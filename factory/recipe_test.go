@@ -9,13 +9,13 @@ import (
 
 func TestGenerateRecipe(t *testing.T) {
 	testTable := []struct {
-		From, To       factory.Mineral
+		From, To       factory.MineralState
 		ExpectedRecipe []factory.RecipeAction
 		ExpectedErr    bool
 	}{
 		{
-			From: factory.Mineral{State: factory.Fracture},
-			To:   factory.Mineral{State: factory.Solid},
+			From: factory.Fracture,
+			To:   factory.Solid,
 			ExpectedRecipe: []factory.RecipeAction{
 				factory.ApplySmelting,
 				factory.ApplyFreezing,
@@ -23,8 +23,8 @@ func TestGenerateRecipe(t *testing.T) {
 			ExpectedErr: false,
 		},
 		{
-			From: factory.Mineral{State: factory.Liquid},
-			To:   factory.Mineral{State: factory.Fracture},
+			From: factory.Liquid,
+			To:   factory.Fracture,
 			ExpectedRecipe: []factory.RecipeAction{
 				factory.ApplyFreezing,
 				factory.ApplyGrinding,
@@ -32,8 +32,8 @@ func TestGenerateRecipe(t *testing.T) {
 			ExpectedErr: false,
 		},
 		{
-			From: factory.Mineral{State: factory.Fracture},
-			To:   factory.Mineral{State: factory.Fracture},
+			From: factory.Fracture,
+			To:   factory.Fracture,
 			ExpectedRecipe: []factory.RecipeAction{
 				factory.ApplyGrinding,
 			},

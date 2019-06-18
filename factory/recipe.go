@@ -38,20 +38,20 @@ func getByOrder(order int) (MineralState, error) {
 // what actions should be applied to current mineral to reach asked mineral state.
 // E.g.: if we pass current = fracture, asked = solid, this function should return
 // recipe: []RecipeAction{"apply_grinding", "apply_smelting", "apply_freezing"}
-func GenerateRecipe(current, asked Mineral) ([]RecipeAction, error) {
+func GenerateRecipe(current, asked MineralState) ([]RecipeAction, error) {
 
 	recipe := []RecipeAction{}
 
 	// check if current and asked states is know for us. If states are
 	// unknown for us, we do not know how to reach those states.
-	if _, ok := stateTable[current.State]; !ok {
-		return recipe, fmt.Errorf("current state '%s' is unknown", current.State)
+	if _, ok := stateTable[current]; !ok {
+		return recipe, fmt.Errorf("current state '%s' is unknown", current)
 	}
-	if _, ok := stateTable[asked.State]; !ok {
-		return recipe, fmt.Errorf("asked state '%s' in unknown", asked.State)
+	if _, ok := stateTable[asked]; !ok {
+		return recipe, fmt.Errorf("asked state '%s' in unknown", asked)
 	}
 
-	return chainActions(recipe, current.State, asked.State)
+	return chainActions(recipe, current, asked)
 }
 
 // chainActions is core logic how to chain recipe actions. This will return

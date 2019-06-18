@@ -56,3 +56,27 @@ func (f *Factory) Smelt() error {
 	}
 	return nil
 }
+
+func (f *Factory) Process() error {
+	recipe, err := GenerateRecipe(f.From, f.To)
+	if err != nil {
+		return err
+	}
+	for _, action := range recipe {
+		switch action {
+		case ApplyGrinding:
+			if err := f.Grind(); err != nil {
+				return err
+			}
+		case ApplySmelting:
+			if err := f.Smelt(); err != nil {
+				return err
+			}
+		case ApplyFreezing:
+			if err := f.Freeze(); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}

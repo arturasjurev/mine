@@ -31,7 +31,7 @@ func (g *MemSmelter) SetPower(watts int) error {
 }
 
 func (g *MemSmelter) Insert(item factory.Mineral) error {
-	if !g.inserted {
+	if g.inserted {
 		return fmt.Errorf("smelter is not empty")
 	}
 	g.resource = item
@@ -40,10 +40,11 @@ func (g *MemSmelter) Insert(item factory.Mineral) error {
 }
 
 func (g *MemSmelter) Takeout() (factory.Mineral, error) {
+	g.inserted = false
 	return g.resource, nil
 }
 
-func (g *MemSmelter) Perform() error {
+func (g *MemSmelter) Process() error {
 	if !g.inserted {
 		return fmt.Errorf("smelter is empty")
 	}
@@ -59,7 +60,7 @@ func (g *MemSmelter) Perform() error {
 	return nil
 }
 
-func (g *MemSmelter) PerformWithCtx(ctx context.Context) error {
+func (g *MemSmelter) ProcessWithCtx(ctx context.Context) error {
 	processTime := factory.CalculateProcessTime(g.resource.Hardness, g.Power)
 	done := time.Tick(processTime)
 

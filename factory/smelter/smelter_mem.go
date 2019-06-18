@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"mine/factory"
+	"github.com/sheirys/mine/factory"
 )
 
 type MemSmelter struct {

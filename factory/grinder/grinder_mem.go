@@ -7,9 +7,10 @@ import (
 	"sync"
 	"time"
 
-	"mine/factory"
+	"github.com/sheirys/mine/factory"
 )
 
+// MemGrinder satisfies Equipment interface defined in factory/equipment.go
 type MemGrinder struct {
 	mtx      *sync.Mutex
 	empty    bool
@@ -49,6 +50,7 @@ func (g *MemGrinder) Insert(item factory.Mineral) error {
 }
 
 func (g *MemGrinder) Takeout() (factory.Mineral, error) {
+	g.empty = true
 	return g.inserted, nil
 }
 
@@ -56,19 +58,32 @@ func (g *MemGrinder) Perform() error {
 	if g.empty {
 		return fmt.Errorf("grinder is empty")
 	}
-	if g.power > 0 {
-		full := g.inserted.Hardness / g.power
-		partial := g.inserted.Hardness % g.power
-		processTime := time.Duration(full) * time.Second
-		processTime += time.Duration(partial) * time.Millisecond
+	processTime := factory.CalculateProcessTime(g.inserted.Hardness, g.power)
 
-		log.Printf("calculated time %s\n", processTime)
+	if processTime != 0 {
 		done := time.Tick(processTime)
 		<-done
 	}
+
+	g.inserted.State = factory.Dust
 	return nil
 }
 
-func (g *MemGrinder) PerformWithCtx(context.Context) error {
+func (g *MemGrinder) PerformWithCtx(ctx context.Context) error {
+	if g.empty {
+		return fmt.Errorf("grinder is empty")
+	}
+	processTime := factory.CalculateProcessTime(g.inserted.Hardness, g.power)
+
+	log.Printf("calculated time %s\n", processTime)
+	done := time.Tick(processTime)
+
+	select {
+	case <-done:
+		g.inserted.State = factory.Dust
+		return nil
+	case <-ctx.Done():
+		return nil
+	}
 	return nil
 }

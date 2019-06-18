@@ -1,6 +1,9 @@
 package factory
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 // Equipment is some magic mechanism in factory. For example equipment
 // can be freezer, grinder, smelter.
@@ -34,4 +37,18 @@ type Equipment interface {
 	// PerformWithCtx is same as Perform, but context should be accepted
 	// in order to stop action in middle.
 	PerformWithCtx(ctx context.Context) error
+}
+
+func CalculateProcessTime(challange, power int) time.Duration {
+	// we cannot apply any calculations if power is zero, because there
+	// will be divizion by zero.
+	if power == 0 {
+		return 0
+	}
+	full := challange / power
+	partial := challange % power
+	processTime := time.Duration(full) * time.Second
+	processTime += time.Duration(partial) * time.Millisecond
+
+	return processTime
 }

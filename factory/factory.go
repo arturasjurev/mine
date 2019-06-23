@@ -2,9 +2,11 @@ package factory
 
 import (
 	"context"
+	"encoding/json"
 	"sync"
+	"time"
 
-	"github.com/sheirys/mine/minerals"
+	"github.com/sheirys/mine/manager/journal"
 	"github.com/streadway/amqp"
 )
 
@@ -14,23 +16,27 @@ type Factory struct {
 	Freezer Equipment
 	Smelter Equipment
 
-	// Resource factory job.
-	Resource minerals.Mineral
-	From     minerals.State
-	To       minerals.State
+	// What order is processed now.
+	Order journal.Order
 
 	AMQPAddress string
 	conn        *amqp.Connection
 	ch          *amqp.Channel
+	amqpClose   chan *amqp.Error
 	consume     <-chan amqp.Delivery
 
 	wg     *sync.WaitGroup
 	cancel context.CancelFunc
 	ctx    context.Context
+
+	updates chan journal.Order
+
+	// FIXME: this is not thread safe
+	inProgress bool
 }
 
 func (f *Factory) Grind() error {
-	if err := f.Grinder.Insert(f.Resource); err != nil {
+	if err := f.Grinder.Insert(f.Order.Mineral); err != nil {
 		return err
 	}
 	if err := f.Grinder.Process(); err != nil {
@@ -39,13 +45,13 @@ func (f *Factory) Grind() error {
 	if product, err := f.Grinder.Takeout(); err != nil {
 		return err
 	} else {
-		f.Resource = product
+		f.Order.Mineral = product
 	}
 	return nil
 }
 
 func (f *Factory) Freeze() error {
-	if err := f.Freezer.Insert(f.Resource); err != nil {
+	if err := f.Freezer.Insert(f.Order.Mineral); err != nil {
 		return err
 	}
 	if err := f.Freezer.Process(); err != nil {
@@ -54,13 +60,13 @@ func (f *Factory) Freeze() error {
 	if product, err := f.Freezer.Takeout(); err != nil {
 		return err
 	} else {
-		f.Resource = product
+		f.Order.Mineral = product
 	}
 	return nil
 }
 
 func (f *Factory) Smelt() error {
-	if err := f.Smelter.Insert(f.Resource); err != nil {
+	if err := f.Smelter.Insert(f.Order.Mineral); err != nil {
 		return err
 	}
 	if err := f.Smelter.Process(); err != nil {
@@ -69,13 +75,17 @@ func (f *Factory) Smelt() error {
 	if product, err := f.Smelter.Takeout(); err != nil {
 		return err
 	} else {
-		f.Resource = product
+		f.Order.Mineral = product
 	}
 	return nil
 }
 
 func (f *Factory) Process() error {
-	recipe, err := GenerateRecipe(f.From, f.To)
+	f.Order.Accepted = true
+	f.Order.AcceptedAt = time.Now()
+	f.publishState()
+
+	recipe, err := GenerateRecipe(f.Order.StateFrom, f.Order.StateTo)
 	if err != nil {
 		return err
 	}
@@ -95,16 +105,24 @@ func (f *Factory) Process() error {
 			}
 		}
 	}
+	f.Order.Finished = true
+	f.Order.FinishedAt = time.Now()
+	f.publishState()
+	return nil
+}
+
+func (f *Factory) Init() error {
+	f.wg = &sync.WaitGroup{}
+	f.ctx, f.cancel = context.WithCancel(context.Background())
+	f.updates = make(chan journal.Order, 10)
+	f.amqpClose = make(chan *amqp.Error)
 	return nil
 }
 
 func (f *Factory) Start() error {
 
+	f.listenAMQP()
 	return nil
-
-	/*
-		f.listen()
-	*/
 
 }
 
@@ -112,4 +130,20 @@ func (f *Factory) Stop() {
 	f.cancel()
 	f.wg.Wait()
 	f.conn.Close()
+}
+
+func (f *Factory) publishState() error {
+	payload, err := json.Marshal(f.Order)
+	if err != nil {
+		return err
+	}
+	return f.ch.Publish("",
+		ordersStatusQueue,
+		true,
+		false,
+		amqp.Publishing{
+			ContentType: "application/json",
+			Body:        payload,
+		},
+	)
 }

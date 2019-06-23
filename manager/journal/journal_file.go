@@ -42,7 +42,9 @@ func (j *JournalFileService) UpsertClient(c Client) (Client, error) {
 			return c, nil
 		}
 	}
-	return Client{}, fmt.Errorf("client %s not found", c.ID)
+	c.ID = generateRandomID()
+	j.data.Clients = append(j.data.Clients, c)
+	return c, nil
 }
 
 func (j *JournalFileService) ListOrders() ([]Order, error) {
@@ -65,7 +67,9 @@ func (j *JournalFileService) UpsertOrder(o Order) (Order, error) {
 			return o, nil
 		}
 	}
-	return Order{}, fmt.Errorf("order %s not found", o.ID)
+	o.ID = generateRandomID()
+	j.data.Orders = append(j.data.Orders, o)
+	return o, nil
 }
 
 func (j *JournalFileService) saveToFile() error {

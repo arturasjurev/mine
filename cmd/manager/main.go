@@ -1,13 +1,34 @@
 package main
 
 import (
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/sheirys/mine/manager"
 	"github.com/sheirys/mine/manager/journal"
 )
 
+var kills = []os.Signal{syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL}
+
 func main() {
-	_ = &manager.Application{
-		Journal: &journal.JournalFileService{},
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, kills...)
+
+	m := &manager.Manager{
+		Journal: &journal.JournalFileService{
+			File: "data.json",
+		},
+		AMQPAddress: "amqp://guest:guest@localhost:5672/",
 	}
+
+	m.Init()
+
+	m.Start()
+
+	<-stop
+
+	m.Stop()
 
 }

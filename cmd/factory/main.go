@@ -5,6 +5,10 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/sheirys/mine/factory"
+	"github.com/sheirys/mine/factory/equipment/freezer"
+	"github.com/sheirys/mine/factory/equipment/grinder"
+	"github.com/sheirys/mine/factory/equipment/smelter"
 )
 
 var kills = []os.Signal{syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL}
@@ -14,38 +18,24 @@ func main() {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, kills...)
 
-	/*
-		factory := &factory.Factory{
-			Grinder: grinder.NewMemGrinder(),
-		}
-	*/
-
-	/*
-		m := factory.Mineral{
-			Hardness: 150,
-		}
-
-		g := grinder.NewMemGrinder()
-
-		if err := g.SetPower(3000); err != nil {
-			log.Fatal(err)
-		}
-
-		if err := g.Insert(m); err != nil {
-			log.Fatal(err)
-		}
-
-		if err := g.Process(); err != nil {
-			log.Fatal(err)
-		}
-	*/
-
-	/*
-	worker := &dispatcher.Worker{
-		Address: "amqp://guest:guest@localhost:5672/",
+	f := &factory.Factory{
+		Grinder: &grinder.MemGrinder{
+			Power: 1000,
+		},
+		Smelter: &smelter.MemSmelter{
+			Power: 1000,
+		},
+		Freezer: &freezer.MemFreezer{
+			Power: 1000,
+		},
+		AMQPAddress: "amqp://guest:guest@localhost:5672/",
 	}
 
-	worker.Listen()
-	*/
+	f.Init()
+
+	f.Start()
+
 	<-stop
+
+	f.Stop()
 }

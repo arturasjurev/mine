@@ -1,6 +1,8 @@
 package journal
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"time"
 
 	"github.com/sheirys/mine/minerals"
@@ -35,4 +37,10 @@ type JournalService interface {
 	ListOrders() ([]Order, error)
 	Order(id string) (Order, error)
 	UpsertOrder(o Order) (Order, error)
+}
+
+func generateRandomID() string {
+	b := make([]byte, 8)
+	rand.Read(b)
+	return hex.EncodeToString(b)
 }

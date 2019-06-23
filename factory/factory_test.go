@@ -13,14 +13,14 @@ import (
 
 func TestFactoryProcess(t *testing.T) {
 	testTable := []struct {
-		Resource        minerals.Mineral
+		Mineral         minerals.Mineral
 		From            minerals.State
 		To              minerals.State
 		ExpectedMineral minerals.Mineral
 		ExpectedErr     bool
 	}{
 		{
-			Resource: minerals.Mineral{
+			Mineral: minerals.Mineral{
 				Name:         "iron",
 				State:        minerals.Fracture,
 				MeltingPoint: 2000,
@@ -47,13 +47,13 @@ func TestFactoryProcess(t *testing.T) {
 	}
 
 	for i, v := range testTable {
-		f.From = v.From
-		f.To = v.To
-		f.Resource = v.Resource
+		f.Order.StateFrom = v.From
+		f.Order.StateTo = v.To
+		f.Order.Mineral = v.Mineral
 
 		err := f.Process()
 		assert.Equal(t, v.ExpectedErr, err != nil, "case %d: %s", i, err)
-		assert.Equal(t, v.ExpectedMineral, f.Resource)
+		assert.Equal(t, v.ExpectedMineral, f.Order.Mineral)
 	}
 
 }

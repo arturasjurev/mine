@@ -39,6 +39,20 @@ func TestGenerateRecipe(t *testing.T) {
 			},
 			ExpectedErr: false,
 		},
+
+		// expected to fail because of unkwnon states.
+		{
+			From:           "",
+			To:             factory.Fracture,
+			ExpectedRecipe: []factory.RecipeAction{},
+			ExpectedErr:    true,
+		},
+		{
+			From:           factory.Fracture,
+			To:             "",
+			ExpectedRecipe: []factory.RecipeAction{},
+			ExpectedErr:    true,
+		},
 	}
 
 	for i, v := range testTable {

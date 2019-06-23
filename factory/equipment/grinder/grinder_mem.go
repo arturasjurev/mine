@@ -6,13 +6,14 @@ import (
 	"time"
 
 	"github.com/sheirys/mine/factory"
+	"github.com/sheirys/mine/minerals"
 )
 
 // MemGrinder satisfies Equipment interface defined in factory/equipment.go
 type MemGrinder struct {
 	Power    int
 	inserted bool
-	resource factory.Mineral
+	resource minerals.Mineral
 }
 
 func NewMemGrinder() *MemGrinder {
@@ -34,7 +35,7 @@ func (g *MemGrinder) SetPower(watts int) error {
 	return nil
 }
 
-func (g *MemGrinder) Insert(item factory.Mineral) error {
+func (g *MemGrinder) Insert(item minerals.Mineral) error {
 	if g.inserted {
 		return fmt.Errorf("grinder is not empty")
 	}
@@ -43,7 +44,7 @@ func (g *MemGrinder) Insert(item factory.Mineral) error {
 	return nil
 }
 
-func (g *MemGrinder) Takeout() (factory.Mineral, error) {
+func (g *MemGrinder) Takeout() (minerals.Mineral, error) {
 	g.inserted = false
 	return g.resource, nil
 }
@@ -59,7 +60,7 @@ func (g *MemGrinder) Process() error {
 		<-done
 	}
 
-	g.resource.State = factory.Fracture
+	g.resource.State = minerals.Fracture
 	if g.resource.Fractures > 0 {
 		g.resource.Fractures *= 2
 	} else {
@@ -77,7 +78,7 @@ func (g *MemGrinder) ProcessWithCtx(ctx context.Context) error {
 
 	select {
 	case <-done:
-		g.resource.State = factory.Fracture
+		g.resource.State = minerals.Fracture
 		return nil
 	case <-ctx.Done():
 		return nil

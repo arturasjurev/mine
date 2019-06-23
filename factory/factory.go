@@ -1,5 +1,13 @@
 package factory
 
+import (
+	"context"
+	"sync"
+
+	"github.com/sheirys/mine/minerals"
+	"github.com/streadway/amqp"
+)
+
 type Factory struct {
 	// Factory equipment.
 	Grinder Equipment
@@ -7,9 +15,18 @@ type Factory struct {
 	Smelter Equipment
 
 	// Resource factory job.
-	Resource Mineral
-	From     MineralState
-	To       MineralState
+	Resource minerals.Mineral
+	From     minerals.State
+	To       minerals.State
+
+	AMQPAddress string
+	conn        *amqp.Connection
+	ch          *amqp.Channel
+	consume     <-chan amqp.Delivery
+
+	wg     *sync.WaitGroup
+	cancel context.CancelFunc
+	ctx    context.Context
 }
 
 func (f *Factory) Grind() error {
@@ -79,4 +96,20 @@ func (f *Factory) Process() error {
 		}
 	}
 	return nil
+}
+
+func (f *Factory) Start() error {
+
+	return nil
+
+	/*
+		f.listen()
+	*/
+
+}
+
+func (f *Factory) Stop() {
+	f.cancel()
+	f.wg.Wait()
+	f.conn.Close()
 }

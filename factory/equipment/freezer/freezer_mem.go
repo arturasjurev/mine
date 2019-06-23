@@ -6,12 +6,13 @@ import (
 	"time"
 
 	"github.com/sheirys/mine/factory"
+	"github.com/sheirys/mine/minerals"
 )
 
 type MemFreezer struct {
 	Power    int
 	inserted bool
-	resource factory.Mineral
+	resource minerals.Mineral
 }
 
 func NewMemFreezer() *MemFreezer {
@@ -30,7 +31,7 @@ func (g *MemFreezer) SetPower(watts int) error {
 	return nil
 }
 
-func (g *MemFreezer) Insert(item factory.Mineral) error {
+func (g *MemFreezer) Insert(item minerals.Mineral) error {
 	if g.inserted {
 		return fmt.Errorf("freezer is not empty")
 	}
@@ -39,7 +40,7 @@ func (g *MemFreezer) Insert(item factory.Mineral) error {
 	return nil
 }
 
-func (g *MemFreezer) Takeout() (factory.Mineral, error) {
+func (g *MemFreezer) Takeout() (minerals.Mineral, error) {
 	g.inserted = false
 	return g.resource, nil
 }
@@ -55,7 +56,7 @@ func (g *MemFreezer) Process() error {
 		<-done
 	}
 
-	g.resource.State = factory.Solid
+	g.resource.State = minerals.Solid
 	g.resource.Fractures = 0
 	return nil
 }
@@ -66,7 +67,7 @@ func (g *MemFreezer) ProcessWithCtx(ctx context.Context) error {
 
 	select {
 	case <-done:
-		g.resource.State = factory.Solid
+		g.resource.State = minerals.Solid
 		return nil
 	case <-ctx.Done():
 		return nil

@@ -7,30 +7,31 @@ import (
 	"github.com/sheirys/mine/factory/equipment/freezer"
 	"github.com/sheirys/mine/factory/equipment/grinder"
 	"github.com/sheirys/mine/factory/equipment/smelter"
+	"github.com/sheirys/mine/minerals"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestFactoryProcess(t *testing.T) {
 	testTable := []struct {
-		Resource        factory.Mineral
-		From            factory.MineralState
-		To              factory.MineralState
-		ExpectedMineral factory.Mineral
+		Resource        minerals.Mineral
+		From            minerals.State
+		To              minerals.State
+		ExpectedMineral minerals.Mineral
 		ExpectedErr     bool
 	}{
 		{
-			Resource: factory.Mineral{
+			Resource: minerals.Mineral{
 				Name:         "iron",
-				State:        factory.Fracture,
+				State:        minerals.Fracture,
 				MeltingPoint: 2000,
 				Hardness:     1000,
 				Fractures:    2,
 			},
-			From: factory.Fracture,
-			To:   factory.Solid,
-			ExpectedMineral: factory.Mineral{
+			From: minerals.Fracture,
+			To:   minerals.Solid,
+			ExpectedMineral: minerals.Mineral{
 				Name:         "iron",
-				State:        factory.Solid,
+				State:        minerals.Solid,
 				MeltingPoint: 2000,
 				Hardness:     1000,
 				Fractures:    0,

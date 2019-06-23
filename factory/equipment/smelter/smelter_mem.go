@@ -6,12 +6,13 @@ import (
 	"time"
 
 	"github.com/sheirys/mine/factory"
+	"github.com/sheirys/mine/minerals"
 )
 
 type MemSmelter struct {
 	Power    int
 	inserted bool
-	resource factory.Mineral
+	resource minerals.Mineral
 }
 
 func NewMemSmelter() *MemSmelter {
@@ -30,7 +31,7 @@ func (g *MemSmelter) SetPower(watts int) error {
 	return nil
 }
 
-func (g *MemSmelter) Insert(item factory.Mineral) error {
+func (g *MemSmelter) Insert(item minerals.Mineral) error {
 	if g.inserted {
 		return fmt.Errorf("smelter is not empty")
 	}
@@ -39,7 +40,7 @@ func (g *MemSmelter) Insert(item factory.Mineral) error {
 	return nil
 }
 
-func (g *MemSmelter) Takeout() (factory.Mineral, error) {
+func (g *MemSmelter) Takeout() (minerals.Mineral, error) {
 	g.inserted = false
 	return g.resource, nil
 }
@@ -55,7 +56,7 @@ func (g *MemSmelter) Process() error {
 		<-done
 	}
 
-	g.resource.State = factory.Liquid
+	g.resource.State = minerals.Liquid
 	g.resource.Fractures = 0
 	return nil
 }
@@ -66,7 +67,7 @@ func (g *MemSmelter) ProcessWithCtx(ctx context.Context) error {
 
 	select {
 	case <-done:
-		g.resource.State = factory.Liquid
+		g.resource.State = minerals.Liquid
 		return nil
 	case <-ctx.Done():
 		return nil

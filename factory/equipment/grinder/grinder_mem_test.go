@@ -5,6 +5,7 @@ import (
 
 	"github.com/sheirys/mine/factory"
 	"github.com/sheirys/mine/factory/equipment/grinder"
+	"github.com/sheirys/mine/minerals"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -12,12 +13,12 @@ import (
 // empty, after inserting minerals into it.
 func TestMemGrinderEmpty(t *testing.T) {
 	var (
-		m   factory.Mineral
+		m   minerals.Mineral
 		g   factory.Equipment
 		err error
 	)
 
-	m = factory.Mineral{}
+	m = minerals.Mineral{}
 	g = grinder.NewMemGrinder()
 
 	// first, grinder should be empty.
@@ -41,14 +42,14 @@ func TestMemGrinderEmpty(t *testing.T) {
 // TestMemGrinderProcess check if mineral changes state after performing grind on it.
 func TestMemGrinderProcess(t *testing.T) {
 	var (
-		m, p factory.Mineral
+		m, p minerals.Mineral
 		g    factory.Equipment
 		err  error
 	)
 
-	m = factory.Mineral{
+	m = minerals.Mineral{
 		Name:  "iron",
-		State: factory.Fracture,
+		State: minerals.Fracture,
 	}
 	g = grinder.NewMemGrinder()
 
@@ -69,5 +70,5 @@ func TestMemGrinderProcess(t *testing.T) {
 	assert.NoError(t, err)
 
 	// after grinder, mineral state should be fracured.
-	assert.Equal(t, factory.MineralState(factory.Fracture), p.State)
+	assert.Equal(t, minerals.State(minerals.Fracture), p.State)
 }

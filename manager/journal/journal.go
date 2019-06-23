@@ -3,7 +3,7 @@ package journal
 import (
 	"time"
 
-	"github.com/sheirys/mine/factory"
+	"github.com/sheirys/mine/minerals"
 )
 
 type Client struct {
@@ -13,16 +13,16 @@ type Client struct {
 }
 
 type Order struct {
-	ID           string               `json:"id"`
-	ClientID     string               `json:"client_id"`
-	Finished     bool                 `json:"finished"`
-	Accepted     bool                 `json:"accepted"`
-	Mineral      factory.Mineral      `json:"mineral"`
-	StateFrom    factory.MineralState `json:"state_from"`
-	StateTo      factory.MineralState `json:"state_to"`
-	RegisteredAt time.Time            `json:"registered_at"`
-	AcceptedAt   time.Time            `json:"accepted_at"`
-	FinishedAt   time.Time            `json:"finished_at"`
+	ID           string           `json:"id"`
+	ClientID     string           `json:"client_id"`
+	Finished     bool             `json:"finished"`
+	Accepted     bool             `json:"accepted"`
+	Mineral      minerals.Mineral `json:"mineral"`
+	StateFrom    minerals.State   `json:"state_from"`
+	StateTo      minerals.State   `json:"state_to"`
+	RegisteredAt time.Time        `json:"registered_at"`
+	AcceptedAt   time.Time        `json:"accepted_at"`
+	FinishedAt   time.Time        `json:"finished_at"`
 }
 
 type JournalService interface {

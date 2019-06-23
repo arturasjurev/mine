@@ -5,7 +5,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/sheirys/mine/dispatcher"
 )
 
 var kills = []os.Signal{syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL}
@@ -41,13 +40,12 @@ func main() {
 		}
 	*/
 
+	/*
 	worker := &dispatcher.Worker{
 		Address: "amqp://guest:guest@localhost:5672/",
 	}
 
 	worker.Listen()
-
+	*/
 	<-stop
-
-	worker.Stop()
 }

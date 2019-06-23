@@ -4,18 +4,19 @@ import (
 	"testing"
 
 	"github.com/sheirys/mine/factory"
+	"github.com/sheirys/mine/minerals"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGenerateRecipe(t *testing.T) {
 	testTable := []struct {
-		From, To       factory.MineralState
+		From, To       minerals.State
 		ExpectedRecipe []factory.RecipeAction
 		ExpectedErr    bool
 	}{
 		{
-			From: factory.Fracture,
-			To:   factory.Solid,
+			From: minerals.Fracture,
+			To:   minerals.Solid,
 			ExpectedRecipe: []factory.RecipeAction{
 				factory.ApplySmelting,
 				factory.ApplyFreezing,
@@ -23,8 +24,8 @@ func TestGenerateRecipe(t *testing.T) {
 			ExpectedErr: false,
 		},
 		{
-			From: factory.Liquid,
-			To:   factory.Fracture,
+			From: minerals.Liquid,
+			To:   minerals.Fracture,
 			ExpectedRecipe: []factory.RecipeAction{
 				factory.ApplyFreezing,
 				factory.ApplyGrinding,
@@ -32,8 +33,8 @@ func TestGenerateRecipe(t *testing.T) {
 			ExpectedErr: false,
 		},
 		{
-			From: factory.Fracture,
-			To:   factory.Fracture,
+			From: minerals.Fracture,
+			To:   minerals.Fracture,
 			ExpectedRecipe: []factory.RecipeAction{
 				factory.ApplyGrinding,
 			},
@@ -43,12 +44,12 @@ func TestGenerateRecipe(t *testing.T) {
 		// expected to fail because of unkwnon states.
 		{
 			From:           "",
-			To:             factory.Fracture,
+			To:             minerals.Fracture,
 			ExpectedRecipe: []factory.RecipeAction{},
 			ExpectedErr:    true,
 		},
 		{
-			From:           factory.Fracture,
+			From:           minerals.Fracture,
 			To:             "",
 			ExpectedRecipe: []factory.RecipeAction{},
 			ExpectedErr:    true,

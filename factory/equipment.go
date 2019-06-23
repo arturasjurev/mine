@@ -3,6 +3,8 @@ package factory
 import (
 	"context"
 	"time"
+
+	"github.com/sheirys/mine/minerals"
 )
 
 // Equipment is some magic mechanism in factory. For example equipment
@@ -22,12 +24,12 @@ type Equipment interface {
 	// Insert mineral into equipment. Mineral should be inserted into
 	// equipment before applying process to this mineral. Equipment
 	// must be empty before inserting something.
-	Insert(item Mineral) error
+	Insert(item minerals.Mineral) error
 
 	// Takeout should return mineral from equipment. After successful
 	// takeout, equipment should become empty. Takeout should fail if
 	// process is in progress.
-	Takeout() (Mineral, error)
+	Takeout() (minerals.Mineral, error)
 
 	// Process action on inserted mineral. Action should change
 	// inserted mineral state. After successful process, mineral can be

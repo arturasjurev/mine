@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"sync"
-	"time"
 
 	"github.com/sheirys/mine/manager/journal"
 	"github.com/streadway/amqp"
@@ -81,9 +80,6 @@ func (f *Factory) Smelt() error {
 }
 
 func (f *Factory) Process() error {
-	f.Order.Accepted = true
-	f.Order.AcceptedAt = time.Now()
-	f.publishState()
 
 	recipe, err := GenerateRecipe(f.Order.StateFrom, f.Order.StateTo)
 	if err != nil {
@@ -105,9 +101,7 @@ func (f *Factory) Process() error {
 			}
 		}
 	}
-	f.Order.Finished = true
-	f.Order.FinishedAt = time.Now()
-	f.publishState()
+
 	return nil
 }
 

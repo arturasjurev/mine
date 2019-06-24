@@ -19,14 +19,18 @@ type JournalFileService struct {
 }
 
 func (j *JournalFileService) Init() error {
-	return nil
+	return j.loadFromFile()
 }
 
 func (j *JournalFileService) ListClients() ([]Client, error) {
-	return j.data.Clients, nil
+	err := j.loadFromFile()
+	return j.data.Clients, err
 }
 
 func (j *JournalFileService) Client(ID string) (Client, error) {
+	if err := j.loadFromFile(); err != nil {
+		return Client{}, err
+	}
 	for _, v := range j.data.Clients {
 		if v.ID == ID {
 			return v, nil
@@ -36,22 +40,29 @@ func (j *JournalFileService) Client(ID string) (Client, error) {
 }
 
 func (j *JournalFileService) UpsertClient(c Client) (Client, error) {
+	if err := j.loadFromFile(); err != nil {
+		return Client{}, err
+	}
 	for i, v := range j.data.Clients {
 		if v.ID == c.ID {
 			j.data.Clients[i] = c
-			return c, nil
+			err := j.saveToFile()
+			return c, err
 		}
 	}
 	c.ID = generateRandomID()
 	j.data.Clients = append(j.data.Clients, c)
-	return c, nil
+	err := j.saveToFile()
+	return c, err
 }
 
 func (j *JournalFileService) ListOrders() ([]Order, error) {
-	return j.data.Orders, nil
+	err := j.loadFromFile()
+	return j.data.Orders, err
 }
 
 func (j *JournalFileService) Order(ID string) (Order, error) {
+	j.loadFromFile()
 	for _, v := range j.data.Orders {
 		if v.ID == ID {
 			return v, nil
@@ -61,14 +72,18 @@ func (j *JournalFileService) Order(ID string) (Order, error) {
 }
 
 func (j *JournalFileService) UpsertOrder(o Order) (Order, error) {
+	// FIXME: don't like loadFromFile call.
+	j.loadFromFile()
 	for i, v := range j.data.Orders {
 		if v.ID == o.ID {
 			j.data.Orders[i] = o
+			j.saveToFile()
 			return o, nil
 		}
 	}
 	o.ID = generateRandomID()
 	j.data.Orders = append(j.data.Orders, o)
+	j.saveToFile()
 	return o, nil
 }
 

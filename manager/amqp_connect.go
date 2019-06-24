@@ -31,7 +31,7 @@ func (m *Manager) listenAMQP() {
 					continue
 				}
 				m.Journal.UpsertOrder(order)
-				log.Printf("order status changed. id=%s accepted=%b finished=%b\n",
+				log.Printf("order status changed. id=%s accepted=%t finished=%t\n",
 					order.ID,
 					order.Accepted,
 					order.Finished)

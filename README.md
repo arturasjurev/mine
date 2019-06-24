@@ -3,3 +3,6 @@
 [![GoDoc](https://godoc.org/github.com/sheirys/mine?status.svg)](https://godoc.org/github.com/sheirys/mine)
 [![codecov](https://codecov.io/gh/sheirys/mine/branch/master/graph/badge.svg)](https://codecov.io/gh/sheirys/mine)
 
+# Mine
+
+![mine_datagram](_assets/mine_datagram.svg)

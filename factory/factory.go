@@ -3,6 +3,7 @@ package factory
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"sync"
 
 	"github.com/sheirys/mine/manager/journal"
@@ -88,14 +89,17 @@ func (f *Factory) Process() error {
 	for _, action := range recipe {
 		switch action {
 		case ApplyGrinding:
+			log.Println("applying grinding")
 			if err := f.Grind(); err != nil {
 				return err
 			}
 		case ApplySmelting:
+			log.Println("applying smelting")
 			if err := f.Smelt(); err != nil {
 				return err
 			}
 		case ApplyFreezing:
+			log.Println("applying freezing")
 			if err := f.Freeze(); err != nil {
 				return err
 			}
@@ -127,6 +131,7 @@ func (f *Factory) Stop() {
 }
 
 func (f *Factory) publishState() error {
+	log.Println("publishing state change")
 	payload, err := json.Marshal(f.Order)
 	if err != nil {
 		return err

@@ -20,13 +20,13 @@ func main() {
 
 	f := &factory.Factory{
 		Grinder: &grinder.MemGrinder{
-			Power: 1000,
+			Power: 500,
 		},
 		Smelter: &smelter.MemSmelter{
-			Power: 1000,
+			Power: 500,
 		},
 		Freezer: &freezer.MemFreezer{
-			Power: 1000,
+			Power: 500,
 		},
 		AMQPAddress: "amqp://guest:guest@localhost:5672/",
 	}

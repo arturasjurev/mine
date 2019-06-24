@@ -37,7 +37,8 @@ func (f *Factory) listenAMQP() {
 				// this time. Send NACK to rabbit and requeue order. Maybe other
 				// factory is available?
 				if err := f.HandleOrder(task); err != nil {
-					deliver.Nack(false, true)
+					log.Printf("nack task: %s\n", err)
+					deliver.Nack(true, true)
 					continue
 				}
 				deliver.Ack(false)

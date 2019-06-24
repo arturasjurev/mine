@@ -20,10 +20,10 @@ const (
 // listenAndServe will do all rabbitmq related logic for factory. Here we will
 // connect to rabbit server, process received orders and notify manager about
 // changed order status.
-func (f *Factory) listenAndServe() {
+func (f *Factory) listenAndServe() error {
 
 	if err := f.prepareRabbit(); err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	go func() {
@@ -60,6 +60,8 @@ func (f *Factory) listenAndServe() {
 			}
 		}
 	}()
+
+	return nil
 }
 
 // prepareRabbit will prepare rabbit connection to factory.

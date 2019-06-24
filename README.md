@@ -16,7 +16,7 @@ This repository tries to satisfy requirements described in [Carbon based life fo
 ## Manager
 
 Manager stores all client and orders in datafile. This datafile will not
-be created on startup and must be created manually with:
+be created on startup and **must be created manually** with:
 ```bash
     $ echo '{}' > datafile.json
 ```
@@ -29,8 +29,6 @@ See more with by providing `-h` argument. Manager can be started with:
 ```
 
 ## Factory
-
-
 
 ## Known issues
 

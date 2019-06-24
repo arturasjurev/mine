@@ -9,82 +9,78 @@ import (
 	"github.com/streadway/amqp"
 )
 
+// Factory is main faactory application structure. Factory will accept orders
+// sent by manager, process order and notifies manager about changed order
+// status (e.g.: accepted / finished).
 type Factory struct {
-	// Factory equipment.
+
+	// Factory equipment. Factory will use this equipment to perform order and
+	// manipulate mineral to reach wanted mineral state.
 	Grinder Equipment
 	Freezer Equipment
 	Smelter Equipment
 
-	// What order is processed now.
-	Order journal.Order
+	// Here currently accepted order is stored. Factory can process only one
+	// order at time and should not queue orders. When factory accepts order
+	// we will set `inProgess` as `true`.
+	// FIXME: `inProgress` is not thread safe.
+	Order      journal.Order
+	inProgress bool
 
+	// Variables used to connect and handle rabbitmq connection.
+	// TODO: reconnect logic not implemented.
 	AMQPAddress string
 	conn        *amqp.Connection
 	ch          *amqp.Channel
 	amqpClose   chan *amqp.Error
 	consume     <-chan amqp.Delivery
 
+	// Internal factory variables.
 	wg     *sync.WaitGroup
 	cancel context.CancelFunc
 	ctx    context.Context
 
+	// when order changes status to accepted or finished, order should be pushed
+	// to this chan. Order pshed to this chan will be sent via rabbitmq to
+	// manager as "order status change" notification.
 	updates chan journal.Order
-
-	// FIXME: this is not thread safe
-	inProgress bool
 }
 
-func (f *Factory) Grind() error {
-	if err := f.Grinder.Insert(f.Order.Mineral); err != nil {
-		return err
-	}
-	if err := f.Grinder.Process(); err != nil {
-		return err
-	}
-	if product, err := f.Grinder.Takeout(); err != nil {
-		return err
-	} else {
-		f.Order.Mineral = product
-	}
+// Init must be called before starting factory. Various initial setups must be
+// done here. E.g. variable initialization.
+func (f *Factory) Init() error {
+	f.wg = &sync.WaitGroup{}
+	f.ctx, f.cancel = context.WithCancel(context.Background())
+	f.updates = make(chan journal.Order, 10)
+	f.amqpClose = make(chan *amqp.Error)
+
 	return nil
 }
 
-func (f *Factory) Freeze() error {
-	if err := f.Freezer.Insert(f.Order.Mineral); err != nil {
-		return err
-	}
-	if err := f.Freezer.Process(); err != nil {
-		return err
-	}
-	if product, err := f.Freezer.Takeout(); err != nil {
-		return err
-	} else {
-		f.Order.Mineral = product
-	}
-	return nil
+// Start rabbitmq connection and start listen incoming orders via rabbitmq.
+func (f *Factory) Start() error {
+	return f.listenAndServe()
 }
 
-func (f *Factory) Smelt() error {
-	if err := f.Smelter.Insert(f.Order.Mineral); err != nil {
-		return err
-	}
-	if err := f.Smelter.Process(); err != nil {
-		return err
-	}
-	if product, err := f.Smelter.Takeout(); err != nil {
-		return err
-	} else {
-		f.Order.Mineral = product
-	}
-	return nil
+// Stop rabbitmq connection and kill factory application.
+func (f *Factory) Stop() {
+	f.cancel()
+	f.wg.Wait()
+	f.conn.Close()
 }
 
+// Process will be called when new order is accepted from manager. Here we will
+// process order, and change mineral state.
 func (f *Factory) Process() error {
 
+	// generate required recipe for this order. Here `recipe` is list of actions
+	// (order matters) that should be applied to mineral to reach wanted mineral
+	// state.
 	recipe, err := GenerateRecipe(f.Order.StateFrom, f.Order.StateTo)
 	if err != nil {
 		return err
 	}
+
 	for _, action := range recipe {
 
 		logrus.WithFields(logrus.Fields{
@@ -94,15 +90,15 @@ func (f *Factory) Process() error {
 
 		switch action {
 		case ApplyGrinding:
-			if err := f.Grind(); err != nil {
+			if err := f.grind(); err != nil {
 				return err
 			}
 		case ApplySmelting:
-			if err := f.Smelt(); err != nil {
+			if err := f.smelt(); err != nil {
 				return err
 			}
 		case ApplyFreezing:
-			if err := f.Freeze(); err != nil {
+			if err := f.freeze(); err != nil {
 				return err
 			}
 		}
@@ -111,23 +107,41 @@ func (f *Factory) Process() error {
 	return nil
 }
 
-func (f *Factory) Init() error {
-	f.wg = &sync.WaitGroup{}
-	f.ctx, f.cancel = context.WithCancel(context.Background())
-	f.updates = make(chan journal.Order, 10)
-	f.amqpClose = make(chan *amqp.Error)
-	return nil
+// grind will be called on `ApplyGrinding` action.
+func (f *Factory) grind() (err error) {
+	if err = f.Grinder.Insert(f.Order.Mineral); err != nil {
+		return err
+	}
+	if err = f.Grinder.Process(); err != nil {
+		return err
+	}
+	f.Order.Mineral, err = f.Grinder.Takeout()
+
+	return err
 }
 
-func (f *Factory) Start() error {
+// freeze will be called on `ApplyFreeze` action.
+func (f *Factory) freeze() (err error) {
+	if err = f.Freezer.Insert(f.Order.Mineral); err != nil {
+		return err
+	}
+	if err = f.Freezer.Process(); err != nil {
+		return err
+	}
+	f.Order.Mineral, err = f.Freezer.Takeout()
 
-	f.listenAndServe()
-	return nil
-
+	return err
 }
 
-func (f *Factory) Stop() {
-	f.cancel()
-	f.wg.Wait()
-	f.conn.Close()
+// smelt will be called on `ApplySmelt` action.
+func (f *Factory) smelt() (err error) {
+	if err = f.Smelter.Insert(f.Order.Mineral); err != nil {
+		return err
+	}
+	if err = f.Smelter.Process(); err != nil {
+		return err
+	}
+	f.Order.Mineral, err = f.Smelter.Takeout()
+
+	return err
 }

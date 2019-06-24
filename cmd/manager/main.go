@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -31,9 +32,13 @@ func main() {
 		HTTPAddress: *bindAddr,
 	}
 
-	m.Init()
+	if err := m.Init(); err != nil {
+		log.Fatal(err)
+	}
 
-	m.Start()
+	if err := m.Start(); err != nil {
+		log.Fatal(err)
+	}
 
 	<-stop
 

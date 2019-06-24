@@ -10,6 +10,8 @@ import (
 	"github.com/streadway/amqp"
 )
 
+// define rabbitmq queue names.
+// FIXME: risk with dependency cycle and move this to manager package?
 const (
 	ordersAcceptQueue = "factory-orders-accept"
 	ordersStatusQueue = "factory-orders-status"

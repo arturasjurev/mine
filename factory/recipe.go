@@ -77,6 +77,8 @@ func chainActions(recipe []RecipeAction, now, stop minerals.State) ([]RecipeActi
 		return recipe, err
 	}
 
+	// here nextState is next possible mineral state. Here we will decide what
+	// actions should be used to reach that state.
 	switch nextState {
 	case minerals.Fracture:
 		recipe = append(recipe, ApplyGrinding)

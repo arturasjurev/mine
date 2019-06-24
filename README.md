@@ -13,16 +13,25 @@ This repository tries to satisfy requirements described in [Carbon based life fo
 
 ![mine_datagram](_assets/mine_datagram.svg)
 
-## Startup
+## Manager
 
-In order to start application checkout it and check modules:
+Manager stores all client and orders data in data file. This data file will not
+be created on startup and must be created manually with:
 ```
-    git clone git@github.com:sheirys/mine.git
-    go mod download
+    $ echo '{}' > datafile.json
 ```
 
+After that, manager can be started with:
+```
+    $ go run cmd/manager/main.go
+```
+
+By default, manager tries to open `datafile.json` as data file, connect to
+rabbitmq with `amqp://guest:guest@localhost:5672` credentials and starts http
+server on `0.0.0.0:8080`. All parameters can be changed via command arguments.
+See more with `go run cmd/manager/main.go -h`.
 
 ## Known issues
 
 * No rabbit reconnection logic implemented.
-* Datafile not created if not exists.
+* Data file must be created manually if not exist.

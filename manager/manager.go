@@ -13,6 +13,8 @@ import (
 type Manager struct {
 	Journal journal.JournalService
 
+	HTTPAddress string
+
 	AMQPAddress string
 	conn        *amqp.Connection
 	ch          *amqp.Channel
@@ -51,7 +53,8 @@ func (m *Manager) Stop() {
 
 func (m *Manager) listenHTTP() {
 	logrus.WithFields(logrus.Fields{
-		"addr": "0.0.0.0:8833",
+		"addr": m.HTTPAddress,
 	}).Info("starting http server")
-	http.ListenAndServe("0.0.0.0:8833", m.Routes())
+
+	http.ListenAndServe(m.HTTPAddress, m.Routes())
 }

@@ -21,6 +21,7 @@ func main() {
 			File: "data.json",
 		},
 		AMQPAddress: "amqp://guest:guest@localhost:5672/",
+		HTTPAddress: "0.0.0.0:8833",
 	}
 
 	m.Init()

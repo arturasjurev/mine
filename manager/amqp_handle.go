@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/sheirys/mine/manager/journal"
+	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 )
 
@@ -27,17 +28,19 @@ func (m *Manager) listenAMQP() {
 			case deliver, _ := <-m.consume:
 				order := journal.Order{}
 				if err := json.Unmarshal(deliver.Body, &order); err != nil {
-					log.Printf("marshal err: %s\n", err)
+					logrus.WithError(err).Error("cannot marshal order update")
 					continue
 				}
 				m.Journal.UpsertOrder(order)
-				log.Printf("order status changed. id=%s accepted=%t finished=%t\n",
-					order.ID,
-					order.Accepted,
-					order.Finished)
+
+				logrus.WithFields(logrus.Fields{
+					"id":       order.ID,
+					"accepted": order.Accepted,
+					"finished": order.Finished,
+				}).Info("order status changed")
 
 			case order := <-m.publish:
-				log.Printf("publishing order. id=%s\n", order.ID)
+				logrus.WithField("id", order.ID).Info("publishing order")
 				m.publishOrder(order)
 
 			// handle if application is closed.
@@ -59,7 +62,6 @@ func (m *Manager) prepareRabbit() error {
 	if m.conn, err = amqp.Dial(m.AMQPAddress); err != nil {
 		return fmt.Errorf("failed to connect rabbit: %s", err)
 	}
-	m.conn.NotifyClose(m.amqpClose)
 	if m.ch, err = m.conn.Channel(); err != nil {
 		return fmt.Errorf("failed to initiate channel: %s", err)
 	}
@@ -72,6 +74,9 @@ func (m *Manager) prepareRabbit() error {
 	if m.consume, err = m.ch.Consume(ordersStatusQueue, "", true, false, false, false, nil); err != nil {
 		return fmt.Errorf("failed to consume: %s", err)
 	}
+
+	m.conn.NotifyClose(m.amqpClose)
+
 	return nil
 }
 

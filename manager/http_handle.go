@@ -3,6 +3,7 @@ package manager
 import (
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/sheirys/mine/manager/api"
 	"github.com/sheirys/mine/manager/journal"
 	"github.com/sirupsen/logrus"
@@ -62,8 +63,23 @@ func (m *Manager) CreateOrder(w http.ResponseWriter, r *http.Request) {
 
 // list all orders
 // Endpoint: [GET] /orders
-func (m *Manager) ListOrders(w http.ResponseWriter, r *http.Request) {}
+func (m *Manager) ListOrders(w http.ResponseWriter, r *http.Request) {
+	orders, err := m.Journal.ListOrders()
+	if err != nil {
+		api.JSON(w, http.StatusInternalServerError, err)
+		return
+	}
+	api.JSON(w, http.StatusOK, orders)
+}
 
 // list single order
 // Endpoint: [GET] /orders/{orderID}
-func (m *Manager) GetOrder(w http.ResponseWriter, r *http.Request) {}
+func (m *Manager) GetOrder(w http.ResponseWriter, r *http.Request) {
+	id := api.SegmentString(mux.Vars(r), "orderID")
+	order, err := m.Journal.Order(id)
+	if err != nil {
+		api.JSON(w, http.StatusNotFound, nil)
+		return
+	}
+	api.JSON(w, http.StatusOK, order)
+}

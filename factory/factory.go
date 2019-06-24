@@ -2,11 +2,10 @@ package factory
 
 import (
 	"context"
-	"encoding/json"
-	"log"
 	"sync"
 
 	"github.com/sheirys/mine/manager/journal"
+	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 )
 
@@ -87,19 +86,22 @@ func (f *Factory) Process() error {
 		return err
 	}
 	for _, action := range recipe {
+
+		logrus.WithFields(logrus.Fields{
+			"order":  f.Order.ID,
+			"action": action,
+		}).Info("applying action")
+
 		switch action {
 		case ApplyGrinding:
-			log.Println("applying grinding")
 			if err := f.Grind(); err != nil {
 				return err
 			}
 		case ApplySmelting:
-			log.Println("applying smelting")
 			if err := f.Smelt(); err != nil {
 				return err
 			}
 		case ApplyFreezing:
-			log.Println("applying freezing")
 			if err := f.Freeze(); err != nil {
 				return err
 			}
@@ -119,7 +121,7 @@ func (f *Factory) Init() error {
 
 func (f *Factory) Start() error {
 
-	f.listenAMQP()
+	f.listenAndServe()
 	return nil
 
 }
@@ -128,21 +130,4 @@ func (f *Factory) Stop() {
 	f.cancel()
 	f.wg.Wait()
 	f.conn.Close()
-}
-
-func (f *Factory) publishState() error {
-	log.Println("publishing state change")
-	payload, err := json.Marshal(f.Order)
-	if err != nil {
-		return err
-	}
-	return f.ch.Publish("",
-		ordersStatusQueue,
-		true,
-		false,
-		amqp.Publishing{
-			ContentType: "application/json",
-			Body:        payload,
-		},
-	)
 }

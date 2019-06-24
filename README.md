@@ -13,6 +13,16 @@ This repository tries to satisfy requirements described in [Carbon based life fo
 
 ![mine_datagram](_assets/mine_datagram.svg)
 
+## Startup
+
+In order to start application checkout it and check modules:
+```
+    git clone git@github.com:sheirys/mine.git
+    go mod download
+```
+
+
 ## Known issues
 
-* No rabbit reconnetion logic.
+* No rabbit reconnection logic implemented.
+* Datafile not created if not exists.

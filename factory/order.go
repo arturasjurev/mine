@@ -23,6 +23,8 @@ func (f *Factory) ProcessOrder(o journal.Order, d amqp.Delivery) {
 		d.Nack(false, true)
 	}
 
+	logrus.WithField("order", o.ID).Info("accepted")
+
 	f.inProgress = true
 	f.Order = o
 

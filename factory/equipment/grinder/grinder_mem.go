@@ -34,6 +34,10 @@ func (g *MemGrinder) SetPower(watts int) error {
 	return nil
 }
 
+func (g *MemGrinder) GetPower() int {
+	return g.Power
+}
+
 func (g *MemGrinder) Insert(item minerals.Mineral) error {
 	if g.inserted {
 		return fmt.Errorf("grinder is not empty")

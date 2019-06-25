@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"os"
 	"os/signal"
 	"syscall"
@@ -15,20 +16,27 @@ var kills = []os.Signal{syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL}
 
 func main() {
 
+	amqpAddr := flag.String("a", "amqp://guest:guest@localhost:5672/", "rabbitmq connection")
+	grinderPower := flag.Int("grinder", 500, "grinder power")
+	smelterPower := flag.Int("smelter", 500, "smelter power")
+	freezerPower := flag.Int("freezer", 500, "freezer power")
+
+	flag.Parse()
+
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, kills...)
 
 	f := &factory.Factory{
 		Grinder: &grinder.MemGrinder{
-			Power: 500,
+			Power: *grinderPower,
 		},
 		Smelter: &smelter.MemSmelter{
-			Power: 500,
+			Power: *smelterPower,
 		},
 		Freezer: &freezer.MemFreezer{
-			Power: 500,
+			Power: *freezerPower,
 		},
-		AMQPAddress: "amqp://guest:guest@localhost:5672/",
+		AMQPAddress: *amqpAddr,
 	}
 
 	f.Init()

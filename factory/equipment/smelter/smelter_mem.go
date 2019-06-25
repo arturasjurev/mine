@@ -30,6 +30,10 @@ func (g *MemSmelter) SetPower(watts int) error {
 	return nil
 }
 
+func (g *MemSmelter) GetPower() int {
+	return g.Power
+}
+
 func (g *MemSmelter) Insert(item minerals.Mineral) error {
 	if g.inserted {
 		return fmt.Errorf("smelter is not empty")

@@ -21,6 +21,8 @@ type Equipment interface {
 	// current action speed.
 	SetPower(watts int) error
 
+	GetPower() int
+
 	// Insert mineral into equipment. Mineral should be inserted into
 	// equipment before applying process to this mineral. Equipment
 	// must be empty before inserting something.

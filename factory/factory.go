@@ -59,6 +59,11 @@ func (f *Factory) Init() error {
 
 // Start rabbitmq connection and start listen incoming orders via rabbitmq.
 func (f *Factory) Start() error {
+	logrus.WithFields(logrus.Fields{
+		"grinder": f.Grinder.GetPower(),
+		"freezer": f.Freezer.GetPower(),
+		"smelter": f.Smelter.GetPower(),
+	}).Info("equipment")
 	return f.listenAndServe()
 }
 

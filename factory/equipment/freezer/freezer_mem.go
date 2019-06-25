@@ -30,6 +30,10 @@ func (g *MemFreezer) SetPower(watts int) error {
 	return nil
 }
 
+func (g *MemFreezer) GetPower() int {
+	return g.Power
+}
+
 func (g *MemFreezer) Insert(item minerals.Mineral) error {
 	if g.inserted {
 		return fmt.Errorf("freezer is not empty")

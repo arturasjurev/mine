@@ -70,6 +70,12 @@ type Journal interface {
 	// UpsertOrder should update existing order by order id provided by argument
 	// If order not found, new order should be created.
 	UpsertOrder(o Order) (Order, error)
+
+	// ListClientOrders should list all orders that belong to given client by
+	// id provided in arguments. If no orders found empty order list with empty
+	// error should be returned. If client does not exist empty order list
+	// should be returned with error.
+	ListClientOrders(id string) ([]Order, error)
 }
 
 // generateRandomID should be used in Journal interface implementations to

@@ -67,7 +67,10 @@ func (m *Manager) Start() error {
 func (m *Manager) Stop() {
 	m.cancel()
 	m.wg.Wait()
-	m.conn.Close()
+
+	if !m.DisableRabbit {
+		m.conn.Close()
+	}
 }
 
 func (m *Manager) listenHTTP() {

@@ -78,3 +78,20 @@ func (j *MemService) UpsertOrder(o Order) (Order, error) {
 	j.data.Orders = append(j.data.Orders, o)
 	return o, nil
 }
+
+// ListClientOrders list all orders that belong to given client by
+// id provided in arguments. If no orders found empty order list with empty
+// error will be returned. If client does not exist empty order list
+// will be returned with error.
+func (j *MemService) ListClientOrders(id string) ([]Order, error) {
+	orders := []Order{}
+	if _, err := j.Client(id); err != nil {
+		return orders, err
+	}
+	for _, v := range j.data.Orders {
+		if v.ClientID == id {
+			orders = append(orders, v)
+		}
+	}
+	return orders, nil
+}

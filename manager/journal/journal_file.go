@@ -102,6 +102,25 @@ func (j *FileService) UpsertOrder(o Order) (Order, error) {
 	return o, nil
 }
 
+// ListClientOrders list all orders that belong to given client by
+// id provided in arguments. If no orders found empty order list with empty
+// error will be returned. If client does not exist empty order list
+// will be returned with error.
+func (j *FileService) ListClientOrders(id string) ([]Order, error) {
+	j.loadFromFile()
+
+	orders := []Order{}
+	if _, err := j.Client(id); err != nil {
+		return orders, err
+	}
+	for _, v := range j.data.Orders {
+		if v.ClientID == id {
+			orders = append(orders, v)
+		}
+	}
+	return orders, nil
+}
+
 // saveToFile will dump data to file.
 func (j *FileService) saveToFile() error {
 	content, err := json.Marshal(j.data)

@@ -13,6 +13,7 @@ import (
 // This file contains tests for journal.FileService implementation. As this
 // implementation needs file to work properly, on each test case we will
 // create temp file a.k.a `mktemp`. Sorry for file flood but I it needs tests.
+// After some tests, try to clean `ls -l /tmp/journal_*` files :).
 
 func TestFileServiceInit(t *testing.T) {
 	temp, _ := ioutil.TempFile("", "journal_*")
@@ -135,4 +136,58 @@ func TestFileServiceNonExistingOrder(t *testing.T) {
 
 	_, err := m.Order("non_existing_id")
 	assert.Error(t, err)
+}
+
+func TestFileServiceListClientOrders(t *testing.T) {
+	temp, _ := ioutil.TempFile("", "journal_*")
+	m := &journal.FileService{
+		File: temp.Name(),
+	}
+	assert.NoError(t, m.Init())
+
+	create := journal.Client{
+		Name:         "some_random_name",
+		RegisteredAt: time.Now(),
+	}
+
+	// create two clients
+	client1, err := m.UpsertClient(create)
+	assert.NoError(t, err)
+
+	client2, err := m.UpsertClient(create)
+	assert.NoError(t, err)
+
+	// create two orders for each client
+
+	order := journal.Order{
+		Mineral: minerals.Mineral{
+			Name:         "jezaus_plaukas",
+			State:        minerals.Fracture,
+			MeltingPoint: 5000000,
+			Hardness:     5000000,
+			Fractures:    1,
+		},
+		StateFrom: minerals.Fracture,
+		StateTo:   minerals.Liquid,
+	}
+
+	order.ClientID = client1.ID
+	order1, err := m.UpsertOrder(order)
+	assert.NoError(t, err)
+
+	order.ClientID = client2.ID
+	order2, err := m.UpsertOrder(order)
+	assert.NoError(t, err)
+
+	// extract orders for client1
+	got, err := m.ListClientOrders(client1.ID)
+	assert.NoError(t, err)
+	assert.Len(t, got, 1)
+	assert.Equal(t, order1, got[0])
+
+	// extract orders for client2
+	got, err = m.ListClientOrders(client2.ID)
+	assert.NoError(t, err)
+	assert.Len(t, got, 1)
+	assert.Equal(t, order2, got[0])
 }

@@ -3,6 +3,7 @@ package manager_test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 	"github.com/sheirys/mine/manager"
 	"github.com/sheirys/mine/manager/journal"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type mockClient struct {
@@ -91,5 +93,58 @@ func TestRouteListClients(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, status)
 	assert.Len(t, response, 1)
+}
 
+func TestRouteManageOrder(t *testing.T) {
+	client := &mockClient{}
+	srv := testServer()
+	defer srv.Stop()
+
+	respClient := journal.Client{}
+	reqClient := journal.Client{
+		Name: "jeddie_star",
+	}
+
+	// create new client
+	status, err := client.Do(srv, "/clients", http.MethodPost, reqClient, &respClient)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, status)
+	assert.NotEmpty(t, respClient.ID)
+	assert.NotEmpty(t, respClient.RegisteredAt)
+
+	respOrder := journal.Order{}
+	reqOrder := journal.Order{}
+
+	// create order for this client
+	baseURL := fmt.Sprintf("/clients/%s/orders", respClient.ID)
+	status, err = client.Do(srv, baseURL, http.MethodPost, reqOrder, &respOrder)
+	require.NoError(t, err)
+	require.Equal(t, http.StatusOK, status)
+	require.NotEqual(t, "", respOrder.ID)
+
+	// check if this order is in queue
+	queued := <-srv.Publish
+	assert.Equal(t, respOrder, queued)
+
+	// check if this order is in client order list
+	orders := []journal.Order{}
+	status, err = client.Do(srv, baseURL, http.MethodGet, nil, &orders)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, status)
+	require.Len(t, orders, 1)
+	require.Equal(t, queued, orders[0])
+
+	// check if this order is in general orders list
+	status, err = client.Do(srv, "/orders", http.MethodGet, nil, &orders)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, status)
+	require.Len(t, orders, 1)
+	require.Equal(t, queued, orders[0])
+
+	// check if this order can be extracted directly by id
+	baseURL = fmt.Sprintf("/orders/%s", queued.ID)
+	status, err = client.Do(srv, baseURL, http.MethodGet, nil, &respOrder)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, status)
+	assert.Equal(t, queued, respOrder)
 }

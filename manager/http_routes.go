@@ -28,7 +28,7 @@ func (m *Manager) Routes() *mux.Router {
 	).Methods(http.MethodPost)
 
 	// lists single client from journal by client_id.
-	// Endpoint: [GET] /clients/{client_id}/orders
+	// Endpoint: [GET] /clients/{client_id}
 	api.Path("/clients/{client_id:[0-9a-f]+}").Handler(
 		loggerChain.ThenFunc(m.GetClient),
 	).Methods(http.MethodGet)
@@ -41,8 +41,8 @@ func (m *Manager) Routes() *mux.Router {
 
 	// creates and registers new order in journal. And notifies
 	// factory about new created order.
-	// Endpoint: [POST] /orders
-	api.Path("/orders").Handler(
+	// Endpoint: [POST] /clients/{client_id}/orders
+	api.Path("/clients/{client_id:[0-9a-f]+}/orders").Handler(
 		loggerChain.ThenFunc(m.CreateOrder),
 	).Methods(http.MethodPost)
 

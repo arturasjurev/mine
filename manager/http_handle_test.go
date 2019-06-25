@@ -52,7 +52,14 @@ func (c *mockClient) Do(app *manager.Manager, url, method string, req, data inte
 		return resp.Code, nil
 	}
 	return resp.Code, json.NewDecoder(body).Decode(&data)
+}
 
+func (c *mockClient) DoWithBody(app *manager.Manager, url, method string, body []byte) (int, error) {
+	r, _ := http.NewRequest(method, url, bytes.NewReader(body))
+	resp := httptest.NewRecorder()
+	app.Routes().ServeHTTP(resp, r)
+
+	return resp.Code, nil
 }
 
 func testServer() *manager.Manager {
@@ -115,8 +122,13 @@ func TestRouteManageOrder(t *testing.T) {
 	respOrder := journal.Order{}
 	reqOrder := journal.Order{}
 
-	// create order for this client
+	// check if order creating fail with bad json
 	baseURL := fmt.Sprintf("/clients/%s/orders", respClient.ID)
+	status, err = client.DoWithBody(srv, baseURL, http.MethodPost, []byte(`{invalid_json}`))
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusBadRequest, status)
+
+	// create order for this client
 	status, err = client.Do(srv, baseURL, http.MethodPost, reqOrder, &respOrder)
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, status)
@@ -147,4 +159,30 @@ func TestRouteManageOrder(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, status)
 	assert.Equal(t, queued, respOrder)
+}
+
+func TestRouteValidation(t *testing.T) {
+	client := &mockClient{}
+	srv := testServer()
+	defer srv.Stop()
+
+	// try to create client with invalid data.
+	status, err := client.DoWithBody(srv, "/clients", http.MethodPost, []byte(`{invalid_json}`))
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusBadRequest, status)
+
+	// try to create order for non existing client
+	status, err = client.Do(srv, "/clients/xxx/orders", http.MethodPost, nil, nil)
+	require.NoError(t, err)
+	require.Equal(t, http.StatusNotFound, status)
+
+	// try to extract non existing client
+	status, err = client.Do(srv, "/clients/xxx", http.MethodGet, nil, nil)
+	require.NoError(t, err)
+	require.Equal(t, http.StatusNotFound, status)
+
+	// try to extract non existing order
+	status, err = client.Do(srv, "/orders/xxx", http.MethodGet, nil, nil)
+	require.NoError(t, err)
+	require.Equal(t, http.StatusNotFound, status)
 }

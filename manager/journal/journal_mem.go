@@ -1,18 +1,12 @@
 package journal
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 )
 
-// FileService implements journal.Journal interface. This implementation used
-// json file as database to store information about orders and clients.
-// FIXME: DumpOnChange not implemented.
-type FileService struct {
-	File         string
-	DumpOnChange bool
-
+// MemService implements journal.Journal interface. This implementation uses
+// slice in memory to store data about clients and orders.
+type MemService struct {
 	data struct {
 		Clients []Client `json:"clients"`
 		Orders  []Order  `json:"orders"`
@@ -21,23 +15,17 @@ type FileService struct {
 
 // Init should be called before use of this service. Here various variable
 // initializations should be applied.
-func (j *FileService) Init() error {
-	return j.loadFromFile()
-}
+func (j *MemService) Init() error { return nil }
 
 // ListClients lists all available clients registered in journal. If no
 // clients are in journal then empty array should be returned with no error.
-func (j *FileService) ListClients() ([]Client, error) {
-	err := j.loadFromFile()
-	return j.data.Clients, err
+func (j *MemService) ListClients() ([]Client, error) {
+	return j.data.Clients, nil
 }
 
 // Client return single client by privided client id. If no client found, then
 // empty client with error will be returned.
-func (j *FileService) Client(ID string) (Client, error) {
-	if err := j.loadFromFile(); err != nil {
-		return Client{}, err
-	}
+func (j *MemService) Client(ID string) (Client, error) {
 	for _, v := range j.data.Clients {
 		if v.ID == ID {
 			return v, nil
@@ -48,34 +36,27 @@ func (j *FileService) Client(ID string) (Client, error) {
 
 // UpsertClient updates existing client, by client id provided in argument
 // client struct. If client is not found, then create new client.
-func (j *FileService) UpsertClient(c Client) (Client, error) {
-	if err := j.loadFromFile(); err != nil {
-		return Client{}, err
-	}
+func (j *MemService) UpsertClient(c Client) (Client, error) {
 	for i, v := range j.data.Clients {
 		if v.ID == c.ID {
 			j.data.Clients[i] = c
-			err := j.saveToFile()
-			return c, err
+			return c, nil
 		}
 	}
 	c.ID = generateRandomID()
 	j.data.Clients = append(j.data.Clients, c)
-	err := j.saveToFile()
-	return c, err
+	return c, nil
 }
 
 // ListOrders lists all available orders registered in journal. If no orders
 // exists, then empty array with no error will be returned.
-func (j *FileService) ListOrders() ([]Order, error) {
-	err := j.loadFromFile()
-	return j.data.Orders, err
+func (j *MemService) ListOrders() ([]Order, error) {
+	return j.data.Orders, nil
 }
 
 // Order returns single order by provided id. If no order found, empty order
 // with error will be returned.
-func (j *FileService) Order(ID string) (Order, error) {
-	j.loadFromFile()
+func (j *MemService) Order(ID string) (Order, error) {
 	for _, v := range j.data.Orders {
 		if v.ID == ID {
 			return v, nil
@@ -86,39 +67,14 @@ func (j *FileService) Order(ID string) (Order, error) {
 
 // UpsertOrder updates existing order by order id provided by argument order.
 // If no order found, new order will be created.
-func (j *FileService) UpsertOrder(o Order) (Order, error) {
-	// FIXME: don't like loadFromFile call.
-	j.loadFromFile()
+func (j *MemService) UpsertOrder(o Order) (Order, error) {
 	for i, v := range j.data.Orders {
 		if v.ID == o.ID {
 			j.data.Orders[i] = o
-			j.saveToFile()
 			return o, nil
 		}
 	}
 	o.ID = generateRandomID()
 	j.data.Orders = append(j.data.Orders, o)
-	j.saveToFile()
 	return o, nil
-}
-
-// saveToFile will dump data to file.
-func (j *FileService) saveToFile() error {
-	content, err := json.Marshal(j.data)
-	if err != nil {
-		return err
-	}
-	return ioutil.WriteFile(j.File, content, 0644)
-}
-
-// loadFromFile will load data from file.
-func (j *FileService) loadFromFile() error {
-	content, err := ioutil.ReadFile(j.File)
-	if err != nil {
-		return err
-	}
-	if len(content) == 0 {
-		content = []byte(`{}`)
-	}
-	return json.Unmarshal(content, &j.data)
 }

@@ -25,11 +25,12 @@ type Manager struct {
 
 	// Variables used to connect and handle rabbitmq connection.
 	// TODO: reconnect logic not implemented.
-	AMQPAddress string
-	conn        *amqp.Connection
-	ch          *amqp.Channel
-	amqpClose   chan *amqp.Error
-	consume     <-chan amqp.Delivery
+	DisableRabbit bool // false for debugging
+	AMQPAddress   string
+	conn          *amqp.Connection
+	ch            *amqp.Channel
+	amqpClose     chan *amqp.Error
+	consume       <-chan amqp.Delivery
 
 	// Internal manager variables.
 	wg     *sync.WaitGroup
@@ -39,7 +40,7 @@ type Manager struct {
 	// when new order is created order should bu pushed to this chan. Everything
 	// pushed to this channel will be published to rabbitmq, so factory should
 	// receive this information.
-	publish chan journal.Order
+	Publish chan journal.Order
 }
 
 // Init must be called before starting manager. Various initial setups must be
@@ -47,7 +48,7 @@ type Manager struct {
 func (m *Manager) Init() error {
 	m.wg = &sync.WaitGroup{}
 	m.ctx, m.cancel = context.WithCancel(context.Background())
-	m.publish = make(chan journal.Order, 5)
+	m.Publish = make(chan journal.Order, 5)
 
 	return m.Journal.Init()
 }

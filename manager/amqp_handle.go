@@ -23,6 +23,12 @@ const (
 // notifications
 func (m *Manager) listenAndServe() {
 
+	// in testing environment like travis ci we probably dont want to
+	// connect to rabbitmq server.
+	if m.DisableRabbit {
+		return
+	}
+
 	if err := m.prepareRabbit(); err != nil {
 		log.Fatal(err)
 	}
@@ -53,7 +59,7 @@ func (m *Manager) listenAndServe() {
 				}).Info("order status changed")
 
 			// hande if new order should be published to factory.
-			case order := <-m.publish:
+			case order := <-m.Publish:
 				logrus.WithField("id", order.ID).Info("publishing order")
 				m.publishOrder(order)
 
@@ -109,6 +115,12 @@ func (m *Manager) prepareRabbit() error {
 
 // publishOrder will notify factory about new order.
 func (m *Manager) publishOrder(o journal.Order) error {
+
+	// in testing environment like travis ci we probably dont want to
+	// connect to rabbitmq server.
+	if m.DisableRabbit {
+		return nil
+	}
 
 	// here order is created directly from struct, so we can rely
 	// on no errors here. Even if error occurs 0f given, because

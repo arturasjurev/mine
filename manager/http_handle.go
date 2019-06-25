@@ -65,7 +65,7 @@ func (m *Manager) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	api.JSON(w, http.StatusOK, created)
-	m.publish <- created
+	m.Publish <- created
 }
 
 // ListOrders lists all orders registered in journal.

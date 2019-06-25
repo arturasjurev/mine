@@ -39,41 +39,6 @@ func TestMemGrinderEmpty(t *testing.T) {
 	assert.Equal(t, true, g.Empty())
 }
 
-// TestMemGrinderProcess check if mineral changes state after performing grind on it.
-func TestMemGrinderProcess(t *testing.T) {
-	var (
-		m, p minerals.Mineral
-		g    factory.Equipment
-		err  error
-	)
-
-	m = minerals.Mineral{
-		Name:  "iron",
-		State: minerals.Solid,
-	}
-	g = grinder.NewMemGrinder()
-
-	// process should fail on empty grinder.
-	err = g.Process()
-	assert.Error(t, err)
-
-	// we should successfuly insert mineral into empty grinder.
-	err = g.Insert(m)
-	assert.NoError(t, err)
-
-	// perform should not throw error, if it is not empty.
-	err = g.Process()
-	assert.NoError(t, err)
-
-	// after performing, we should take out grinded minerals.
-	p, err = g.Takeout()
-	assert.NoError(t, err)
-
-	// after grinder, mineral state should be fracured.
-	assert.Equal(t, minerals.State(minerals.Fracture), p.State)
-	assert.Equal(t, 2, p.Fractures)
-}
-
 func TestMemGrinderPower(t *testing.T) {
 	g := grinder.NewMemGrinder()
 

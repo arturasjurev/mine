@@ -1,7 +1,6 @@
 package freezer
 
 import (
-	"context"
 	"fmt"
 	"time"
 
@@ -59,17 +58,4 @@ func (g *MemFreezer) Process() error {
 	g.resource.State = minerals.Solid
 	g.resource.Fractures = 0
 	return nil
-}
-
-func (g *MemFreezer) ProcessWithCtx(ctx context.Context) error {
-	processTime := factory.CalculateProcessTime(g.resource.Hardness, g.Power)
-	done := time.Tick(processTime)
-
-	select {
-	case <-done:
-		g.resource.State = minerals.Solid
-		return nil
-	case <-ctx.Done():
-		return nil
-	}
 }

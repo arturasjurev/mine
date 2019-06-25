@@ -1,7 +1,6 @@
 package factory
 
 import (
-	"context"
 	"time"
 
 	"github.com/sheirys/mine/minerals"
@@ -36,10 +35,6 @@ type Equipment interface {
 	// inserted mineral state. After successful process, mineral can be
 	// taked out.
 	Process() error
-
-	// ProcessWithCtx is same as Process, but context should be accepted
-	// in order to stop action in middle.
-	ProcessWithCtx(ctx context.Context) error
 }
 
 // CalculateProcessTime will calculate how long equipment should process inserted

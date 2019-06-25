@@ -1,7 +1,6 @@
 package smelter
 
 import (
-	"context"
 	"fmt"
 	"time"
 
@@ -59,17 +58,4 @@ func (g *MemSmelter) Process() error {
 	g.resource.State = minerals.Liquid
 	g.resource.Fractures = 0
 	return nil
-}
-
-func (g *MemSmelter) ProcessWithCtx(ctx context.Context) error {
-	processTime := factory.CalculateProcessTime(g.resource.Hardness, g.Power)
-	done := time.Tick(processTime)
-
-	select {
-	case <-done:
-		g.resource.State = minerals.Liquid
-		return nil
-	case <-ctx.Done():
-		return nil
-	}
 }

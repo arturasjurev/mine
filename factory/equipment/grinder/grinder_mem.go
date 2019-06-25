@@ -6,6 +6,7 @@ import (
 
 	"github.com/sheirys/mine/factory"
 	"github.com/sheirys/mine/minerals"
+	"github.com/sirupsen/logrus"
 )
 
 // MemGrinder satisfies Equipment interface defined in factory/equipment.go
@@ -57,6 +58,7 @@ func (g *MemGrinder) Process() error {
 		return fmt.Errorf("grinder is empty")
 	}
 	processTime := factory.CalculateProcessTime(g.resource.Hardness, g.Power)
+	logrus.WithField("expected_time", processTime).Info("grinding")
 
 	if processTime != 0 {
 		done := time.Tick(processTime)

@@ -29,6 +29,16 @@ func TestCalculateProcessTime(t *testing.T) {
 			ExpectedDuration: 25 * time.Second,
 		},
 		{
+			Challenge:        500,
+			Power:            2000,
+			ExpectedDuration: 250 * time.Millisecond,
+		},
+		{
+			Challenge:        1000,
+			Power:            4000,
+			ExpectedDuration: 250 * time.Millisecond,
+		},
+		{
 			Challenge:        5000,
 			Power:            0,
 			ExpectedDuration: 0,

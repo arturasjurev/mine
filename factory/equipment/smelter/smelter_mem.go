@@ -6,6 +6,7 @@ import (
 
 	"github.com/sheirys/mine/factory"
 	"github.com/sheirys/mine/minerals"
+	"github.com/sirupsen/logrus"
 )
 
 type MemSmelter struct {
@@ -52,7 +53,8 @@ func (g *MemSmelter) Process() error {
 	if !g.inserted {
 		return fmt.Errorf("smelter is empty")
 	}
-	processTime := factory.CalculateProcessTime(g.resource.Hardness, g.Power)
+	processTime := factory.CalculateProcessTime(g.resource.MeltingPoint, g.Power)
+	logrus.WithField("expected_time", processTime).Info("smelting")
 
 	if processTime != 0 {
 		done := time.Tick(processTime)

@@ -1,6 +1,7 @@
 package factory
 
 import (
+	"math"
 	"time"
 
 	"github.com/sheirys/mine/minerals"
@@ -48,10 +49,14 @@ func CalculateProcessTime(challange, power int) time.Duration {
 	if power == 0 {
 		return 0
 	}
-	full := challange / power
-	partial := challange % power
+
+	multiply := float64(challange) / float64(power)
+
+	full := int(multiply)
+	partial := multiply - math.Floor(multiply)
+
 	processTime := time.Duration(full) * time.Second
-	processTime += time.Duration(partial) * time.Millisecond
+	processTime += time.Duration(partial*1000) * time.Millisecond
 
 	return processTime
 }

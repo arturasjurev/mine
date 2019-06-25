@@ -1,7 +1,6 @@
 package grinder
 
 import (
-	"context"
 	"fmt"
 	"time"
 
@@ -67,20 +66,4 @@ func (g *MemGrinder) Process() error {
 		g.resource.Fractures = 2
 	}
 	return nil
-}
-
-func (g *MemGrinder) ProcessWithCtx(ctx context.Context) error {
-	if !g.inserted {
-		return fmt.Errorf("grinder is empty")
-	}
-	processTime := factory.CalculateProcessTime(g.resource.Hardness, g.Power)
-	done := time.Tick(processTime)
-
-	select {
-	case <-done:
-		g.resource.State = minerals.Fracture
-		return nil
-	case <-ctx.Done():
-		return nil
-	}
 }

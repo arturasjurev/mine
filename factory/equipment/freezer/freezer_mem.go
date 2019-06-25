@@ -72,5 +72,4 @@ func (g *MemFreezer) ProcessWithCtx(ctx context.Context) error {
 	case <-ctx.Done():
 		return nil
 	}
-	return nil
 }

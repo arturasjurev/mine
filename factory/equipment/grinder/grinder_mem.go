@@ -64,7 +64,7 @@ func (g *MemGrinder) Process() error {
 	if g.resource.Fractures > 0 {
 		g.resource.Fractures *= 2
 	} else {
-		g.resource.Fractures = 1
+		g.resource.Fractures = 2
 	}
 	return nil
 }
@@ -83,5 +83,4 @@ func (g *MemGrinder) ProcessWithCtx(ctx context.Context) error {
 	case <-ctx.Done():
 		return nil
 	}
-	return nil
 }

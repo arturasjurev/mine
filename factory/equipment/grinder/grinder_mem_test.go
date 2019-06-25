@@ -49,7 +49,7 @@ func TestMemGrinderProcess(t *testing.T) {
 
 	m = minerals.Mineral{
 		Name:  "iron",
-		State: minerals.Fracture,
+		State: minerals.Solid,
 	}
 	g = grinder.NewMemGrinder()
 
@@ -71,4 +71,40 @@ func TestMemGrinderProcess(t *testing.T) {
 
 	// after grinder, mineral state should be fracured.
 	assert.Equal(t, minerals.State(minerals.Fracture), p.State)
+	assert.Equal(t, 2, p.Fractures)
+}
+
+func TestMemGrinderPower(t *testing.T) {
+	g := grinder.NewMemGrinder()
+
+	err := g.SetPower(-1)
+	assert.Error(t, err)
+
+	err = g.SetPower(0)
+	assert.NoError(t, err)
+
+	err = g.SetPower(100)
+	assert.NoError(t, err)
+}
+
+func TestMemGrinderFractures(t *testing.T) {
+	m := minerals.Mineral{
+		Name:      "iron",
+		State:     minerals.Fracture,
+		Fractures: 4,
+	}
+	g := grinder.NewMemGrinder()
+
+	err := g.Insert(m)
+	assert.NoError(t, err)
+
+	err = g.Process()
+	assert.NoError(t, err)
+
+	p, err := g.Takeout()
+	assert.NoError(t, err)
+
+	// after grinder, mineral state should be fracured.
+	assert.Equal(t, minerals.State(minerals.Fracture), p.State)
+	assert.Equal(t, 8, p.Fractures)
 }

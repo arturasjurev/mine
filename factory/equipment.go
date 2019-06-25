@@ -8,7 +8,8 @@ import (
 )
 
 // Equipment is some magic mechanism in factory. For example equipment
-// can be freezer, grinder, smelter.
+// can be freezer, grinder, smelter. Equipment will be used to manipulate
+// mineral state.
 type Equipment interface {
 
 	// Empty returns true if equipment is empty. Equipment can hold

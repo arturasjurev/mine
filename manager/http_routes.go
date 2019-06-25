@@ -15,39 +15,46 @@ func (m *Manager) Routes() *mux.Router {
 
 	loggerChain := alice.New(m.loggerMiddleware)
 
-	// list all available clients
+	// lists all available clients registered in journal.
 	// Endpoint: [GET] /clients
 	api.Path("/clients").Handler(
 		loggerChain.ThenFunc(m.ListClients),
 	).Methods(http.MethodGet)
 
-	// create new client
+	// creates and registers new client in journal.
 	// Endpoint: [POST] /clients
 	api.Path("/clients").Handler(
 		loggerChain.ThenFunc(m.CreateClient),
 	).Methods(http.MethodPost)
 
-	// list client orders
+	// lists single client from journal by client_id.
 	// Endpoint: [GET] /clients/{client_id}/orders
-	api.Path("/clients/{clientID:[0-9a-f]+}/orders").Handler(
+	api.Path("/clients/{client_id:[0-9a-f]+}").Handler(
 		loggerChain.ThenFunc(m.GetClient),
 	).Methods(http.MethodGet)
 
-	// create order
+	// list all orders from journal that belongs to client.
+	// Endpoint: [GET] /clients/{client_id}/orders
+	api.Path("/clients/{client_id:[0-9a-f]+}/orders").Handler(
+		loggerChain.ThenFunc(m.ListClientOrders),
+	).Methods(http.MethodGet)
+
+	// creates and registers new order in journal. And notifies
+	// factory about new created order.
 	// Endpoint: [POST] /orders
 	api.Path("/orders").Handler(
 		loggerChain.ThenFunc(m.CreateOrder),
 	).Methods(http.MethodPost)
 
-	// list all orders
+	// lists all orders registered in journal.
 	// Endpoint: [GET] /orders
 	api.Path("/orders").Handler(
 		loggerChain.ThenFunc(m.ListOrders),
 	).Methods(http.MethodGet)
 
 	// list single order
-	// Endpoint: [GET] /orders/{orderID}
-	api.Path("/orders/{orderID:[0-9a-f]+}").Handler(
+	// Endpoint: [GET] /orders/{order_id}
+	api.Path("/orders/{order_id:[0-9a-f]+}").Handler(
 		loggerChain.ThenFunc(m.GetOrder),
 	).Methods(http.MethodGet)
 

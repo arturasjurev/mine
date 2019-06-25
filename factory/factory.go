@@ -9,7 +9,7 @@ import (
 	"github.com/streadway/amqp"
 )
 
-// Factory is main faactory application structure. Factory will accept orders
+// Factory is main factory application structure. Factory will accept orders
 // sent by manager, process order and notifies manager about changed order
 // status (e.g.: accepted / finished).
 type Factory struct {
@@ -23,7 +23,7 @@ type Factory struct {
 	// Here currently accepted order is stored. Factory can process only one
 	// order at time and should not queue orders. When factory accepts order
 	// we will set `inProgess` as `true`.
-	// FIXME: `inProgress` is not thread safe.
+	// FIXME: `inProgress` is not thread safe but in this scale will work.
 	Order      journal.Order
 	inProgress bool
 

@@ -6,9 +6,9 @@ import (
 	"io/ioutil"
 )
 
-// this is journal to file implementation
-
-type JournalFileService struct {
+// FileService implements journal.Journal interface. This implementation used
+// json file as database to store information about orders and clients.
+type FileService struct {
 	File         string
 	DumpOnChange bool
 
@@ -18,16 +18,22 @@ type JournalFileService struct {
 	}
 }
 
-func (j *JournalFileService) Init() error {
+// Init should be called before use of this service. Here various variable
+// initializations should be applied.
+func (j *FileService) Init() error {
 	return j.loadFromFile()
 }
 
-func (j *JournalFileService) ListClients() ([]Client, error) {
+// ListClients lists all available clients registered in journal. If no
+// clients are in journal then empty array should be returned with no error.
+func (j *FileService) ListClients() ([]Client, error) {
 	err := j.loadFromFile()
 	return j.data.Clients, err
 }
 
-func (j *JournalFileService) Client(ID string) (Client, error) {
+// Client return single client by privided client id. If no client found, then
+// empty client with error will be returned.
+func (j *FileService) Client(ID string) (Client, error) {
 	if err := j.loadFromFile(); err != nil {
 		return Client{}, err
 	}
@@ -39,7 +45,9 @@ func (j *JournalFileService) Client(ID string) (Client, error) {
 	return Client{}, fmt.Errorf("client %s not found", ID)
 }
 
-func (j *JournalFileService) UpsertClient(c Client) (Client, error) {
+// UpsertClient updates existing client, by client id provided in argument
+// client struct. If client is not found, then create new client.
+func (j *FileService) UpsertClient(c Client) (Client, error) {
 	if err := j.loadFromFile(); err != nil {
 		return Client{}, err
 	}
@@ -56,12 +64,16 @@ func (j *JournalFileService) UpsertClient(c Client) (Client, error) {
 	return c, err
 }
 
-func (j *JournalFileService) ListOrders() ([]Order, error) {
+// ListOrders lists all available orders registered in journal. If no orders
+// exists, then empty array with no error will be returned.
+func (j *FileService) ListOrders() ([]Order, error) {
 	err := j.loadFromFile()
 	return j.data.Orders, err
 }
 
-func (j *JournalFileService) Order(ID string) (Order, error) {
+// Order returns single order by provided id. If no order found, empty order
+// with error will be returned.
+func (j *FileService) Order(ID string) (Order, error) {
 	j.loadFromFile()
 	for _, v := range j.data.Orders {
 		if v.ID == ID {
@@ -71,7 +83,9 @@ func (j *JournalFileService) Order(ID string) (Order, error) {
 	return Order{}, fmt.Errorf("order %s not found", ID)
 }
 
-func (j *JournalFileService) UpsertOrder(o Order) (Order, error) {
+// UpsertOrder updates existing order by order id provided by argument order.
+// If no order found, new order will be created.
+func (j *FileService) UpsertOrder(o Order) (Order, error) {
 	// FIXME: don't like loadFromFile call.
 	j.loadFromFile()
 	for i, v := range j.data.Orders {
@@ -87,7 +101,8 @@ func (j *JournalFileService) UpsertOrder(o Order) (Order, error) {
 	return o, nil
 }
 
-func (j *JournalFileService) saveToFile() error {
+// saveToFile will dump data to file.
+func (j *FileService) saveToFile() error {
 	content, err := json.Marshal(j.data)
 	if err != nil {
 		return err
@@ -95,7 +110,8 @@ func (j *JournalFileService) saveToFile() error {
 	return ioutil.WriteFile(j.File, content, 0644)
 }
 
-func (j *JournalFileService) loadFromFile() error {
+// loadFromFile will load data from file.
+func (j *FileService) loadFromFile() error {
 	content, err := ioutil.ReadFile(j.File)
 	if err != nil {
 		return err

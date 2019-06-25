@@ -9,7 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// list all available clients
+// ListClients lists all available clients registered in journal.
 // Endpoint: [GET] /clients
 func (m *Manager) ListClients(w http.ResponseWriter, r *http.Request) {
 	clients, err := m.Journal.ListClients()
@@ -20,7 +20,7 @@ func (m *Manager) ListClients(w http.ResponseWriter, r *http.Request) {
 	api.JSON(w, http.StatusOK, clients)
 }
 
-// create new client
+// CreateClient creates and registers new client in journal.
 // Endpoint: [POST] /clients
 func (m *Manager) CreateClient(w http.ResponseWriter, r *http.Request) {
 	client := journal.Client{}
@@ -38,11 +38,18 @@ func (m *Manager) CreateClient(w http.ResponseWriter, r *http.Request) {
 	api.JSON(w, http.StatusOK, created)
 }
 
-// list client orders
-// Endpoint: [GET] /clients/{client_id}/orders
+// GetClient lists single client from journal by client_id.
+// Endpoint: [GET] /clients/{client_id}
+// FIXME: implement this.
 func (m *Manager) GetClient(w http.ResponseWriter, r *http.Request) {}
 
-// create order
+// ListClientOrders list all orders from journal that belongs to client.
+// Endpoint: [GET] /clients/{client_id}/orders
+// FIXME: implement this.
+func (m *Manager) ListClientOrders(w http.ResponseWriter, r *http.Request) {}
+
+// CreateOrder creates and registers new order in journal. And notifies factory
+// about new created order.
 // Endpoint: [POST] /clients/{client_id}/orders
 func (m *Manager) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	order := journal.Order{}
@@ -61,8 +68,9 @@ func (m *Manager) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	m.publish <- created
 }
 
-// list all orders
-// Endpoint: [GET] /orders
+// ListOrders lists all orders registered in journal.
+// Endpoint: [POST] /clients/{client_id}/orders
+// FIXME: fix url.
 func (m *Manager) ListOrders(w http.ResponseWriter, r *http.Request) {
 	orders, err := m.Journal.ListOrders()
 	if err != nil {
@@ -72,10 +80,10 @@ func (m *Manager) ListOrders(w http.ResponseWriter, r *http.Request) {
 	api.JSON(w, http.StatusOK, orders)
 }
 
-// list single order
-// Endpoint: [GET] /orders/{orderID}
+// GetOrder list single order from journal by provided order_id
+// Endpoint: [GET] /orders/{order_id}
 func (m *Manager) GetOrder(w http.ResponseWriter, r *http.Request) {
-	id := api.SegmentString(mux.Vars(r), "orderID")
+	id := api.SegmentString(mux.Vars(r), "order_id")
 	order, err := m.Journal.Order(id)
 	if err != nil {
 		api.JSON(w, http.StatusNotFound, nil)

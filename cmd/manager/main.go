@@ -25,7 +25,7 @@ func main() {
 	signal.Notify(stop, kills...)
 
 	m := &manager.Manager{
-		Journal: &journal.JournalFileService{
+		Journal: &journal.FileService{
 			File: *dataFile,
 		},
 		AMQPAddress: *amqpAddr,
